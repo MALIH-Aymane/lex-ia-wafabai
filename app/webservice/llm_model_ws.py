@@ -28,6 +28,16 @@ def create_model():
         if not data.get("name") or not data.get("provider"):
             return jsonify({"error": "Missing 'name' or 'provider' field"}), 400
 
+        is_default = bool(data.get("is_default", False))
+        
+        # If no default model exists currently, make this one default automatically
+        existing_default = LLMModel.query.filter_by(is_default=True).first()
+        if not existing_default:
+            is_default = True
+
+        if is_default:
+            LLMModel.query.update({LLMModel.is_default: False})
+
         model = LLMModel(
             name=data["name"],
             provider=data["provider"],
@@ -35,7 +45,8 @@ def create_model():
             api_key=data.get("api_key"),
             temperature=data.get("temperature", 0.7),
             max_tokens=data.get("max_tokens", 2048),
-            is_active=data.get("is_active", True)
+            is_active=data.get("is_active", True),
+            is_default=is_default
         )
 
         db.session.add(model)
@@ -71,6 +82,10 @@ def update_model(model_id):
         model = LLMModel.query.get_or_404(model_id)
         data = request.get_json()
 
+        if "is_default" in data and data["is_default"]:
+            LLMModel.query.filter(LLMModel.id != model_id).update({LLMModel.is_default: False})
+            model.is_default = True
+
         model.name = data.get("name", model.name)
         model.provider = data.get("provider", model.provider)
         model.endpoint = data.get("endpoint", model.endpoint)
@@ -95,8 +110,17 @@ def update_model(model_id):
 def delete_model(model_id):
     try:
         model = LLMModel.query.get_or_404(model_id)
+        was_default = model.is_default
+
         db.session.delete(model)
         db.session.commit()
+
+        if was_default:
+            next_model = LLMModel.query.filter_by(is_active=True).first()
+            if next_model:
+                next_model.is_default = True
+                db.session.commit()
+
         return jsonify({"message": f"Model '{model.name}' deleted successfully"}), 200
     except Exception as e:
         traceback.print_exc()
@@ -107,7 +131,7 @@ def delete_model(model_id):
 # -------------------------------------------------------------
 # 6️⃣ Toggle model activation (active/inactive)
 # -------------------------------------------------------------
-@llm_model_ws.route("/llm-models/<int:model_id>/toggle", methods=["PATCH"])
+@llm_model_ws.route("/llm-models/<int:model_id>/toggle", methods=["PATCH", "PUT"])
 def toggle_model(model_id):
     try:
         model = LLMModel.query.get_or_404(model_id)
@@ -117,6 +141,29 @@ def toggle_model(model_id):
         status = "activated" if model.is_active else "deactivated"
         return jsonify({
             "message": f"Model '{model.name}' has been {status}.",
+            "model": model.as_dict()
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+# -------------------------------------------------------------
+# 6️⃣b Set model as default
+# -------------------------------------------------------------
+@llm_model_ws.route("/llm-models/<int:model_id>/default", methods=["PATCH", "PUT"])
+def set_default_model(model_id):
+    try:
+        model = LLMModel.query.get_or_404(model_id)
+        LLMModel.query.update({LLMModel.is_default: False})
+        model.is_default = True
+        model.is_active = True  # Default model should also be active
+        db.session.commit()
+
+        return jsonify({
+            "message": f"Model '{model.name}' is now set as the default model.",
             "model": model.as_dict()
         }), 200
 

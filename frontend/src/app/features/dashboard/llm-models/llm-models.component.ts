@@ -11,6 +11,7 @@ interface LLMModel {
   endpoint: string | null;
   api_key?: string;
   is_active: boolean;
+  is_default: boolean;
   temperature: number;
   max_tokens: number;
   testing?: boolean;
@@ -25,7 +26,7 @@ const PROVIDERS = [
 ];
 
 function emptyModel(): Partial<LLMModel> {
-  return { name: '', provider: 'ollama', endpoint: '', api_key: '', temperature: 0.7, max_tokens: 2048, is_active: true };
+  return { name: '', provider: 'ollama', endpoint: '', api_key: '', temperature: 0.7, max_tokens: 2048, is_active: true, is_default: false };
 }
 
 @Component({
@@ -56,6 +57,15 @@ function emptyModel(): Partial<LLMModel> {
       <div class="stat-body">
         <div class="stat-val">{{ uniqueProviders() }}</div>
         <div class="stat-lbl">Fournisseurs</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-body">
+        <div class="stat-val" style="font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" [title]="defaultModel()?.name || 'Aucun'">
+          {{ defaultModel() ? defaultModel()?.name : 'Aucun' }}
+        </div>
+        <div class="stat-lbl">Modèle par défaut</div>
       </div>
     </div>
     <div class="stat-card stat-card-action">
@@ -104,14 +114,18 @@ function emptyModel(): Partial<LLMModel> {
     <div class="model-card animate-fadeInUp"
          *ngFor="let m of filteredModels(); let i = index"
          [class.model-card-inactive]="!m.is_active"
+         [class.model-card-default]="m.is_default"
          [style.animation-delay]="i * 0.05 + 's'">
 
       <!-- Card top ribbon -->
       <div class="card-ribbon" [style.background]="providerColor(m.provider)"></div>
 
       <div class="card-header">
-        <div class="provider-badge" [style.background]="providerColor(m.provider) + '22'" [style.color]="providerColor(m.provider)">
-          {{ providerIcon(m.provider) }} {{ m.provider | titlecase }}
+        <div style="display:flex; align-items:center; gap:6px">
+          <div class="provider-badge" [style.background]="providerColor(m.provider) + '22'" [style.color]="providerColor(m.provider)">
+            {{ providerIcon(m.provider) }} {{ m.provider | titlecase }}
+          </div>
+          <span class="badge-default" *ngIf="m.is_default" title="Modèle sélectionné par défaut">⭐ Par défaut</span>
         </div>
         <div class="status-toggle" (click)="toggleModel(m)" [title]="m.is_active ? 'Désactiver' : 'Activer'">
           <div class="toggle-track" [class.toggle-on]="m.is_active">
@@ -153,11 +167,16 @@ function emptyModel(): Partial<LLMModel> {
       </div>
 
       <div class="card-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
-        <button class="btn-icon btn-icon-test" (click)="testModel(m)" [disabled]="m.testing" title="Tester la connexion">
-          <span class="spinner-sm" *ngIf="m.testing"></span>
-          <svg *ngIf="!m.testing" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          {{ m.testing ? 'Test en cours…' : 'Tester' }}
-        </button>
+        <div style="display:flex; gap:6px; align-items:center">
+          <button class="btn-icon btn-icon-test" (click)="testModel(m)" [disabled]="m.testing" title="Tester la connexion">
+            <span class="spinner-sm" *ngIf="m.testing"></span>
+            <svg *ngIf="!m.testing" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            {{ m.testing ? 'Test…' : 'Tester' }}
+          </button>
+          <button class="btn-icon btn-icon-default" *ngIf="!m.is_default" (click)="setDefault(m)" title="Définir comme modèle par défaut">
+            ⭐ Par défaut
+          </button>
+        </div>
         <div style="display:flex; gap:8px; margin-left:auto">
           <button class="btn-icon btn-icon-edit" (click)="openEdit(m)" title="Modifier">
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -250,6 +269,16 @@ function emptyModel(): Partial<LLMModel> {
               <div class="toggle-knob"></div>
             </div>
             <span class="toggle-label">{{ form.is_active ? '✅ Actif – sera disponible pour la recherche' : '⏸️ Inactif – non disponible' }}</span>
+          </div>
+        </div>
+
+        <div class="form-field form-field-toggle">
+          <label class="form-label">Modèle par défaut</label>
+          <div class="status-toggle status-toggle-lg" (click)="form.is_default = !form.is_default">
+            <div class="toggle-track" [class.toggle-on]="form.is_default">
+              <div class="toggle-knob"></div>
+            </div>
+            <span class="toggle-label">{{ form.is_default ? '⭐ Défini comme modèle par défaut' : '⭐ Définir comme modèle par défaut' }}</span>
           </div>
         </div>
       </div>
@@ -362,6 +391,8 @@ function emptyModel(): Partial<LLMModel> {
     .param-lbl { font-size: 10px; color: #adb5bd; font-weight: 600; text-transform: uppercase; }
     .param-val { font-size: 14px; font-weight: 700; color: #0a1f4e; }
     .card-footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #f1f3f5; }
+    .badge-default { padding: 3px 8px; background: rgba(245,158,11,.15); color: #b45309; border: 1px solid rgba(245,158,11,.3); border-radius: 99px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+    .model-card-default { border: 2px solid #f59e0b !important; box-shadow: 0 4px 16px rgba(245,158,11,.15) !important; }
     .btn-icon { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .18s; border: 1.5px solid; }
     .btn-icon-edit  { color: #ff7a00; border-color: rgba(255,122,0,.3); background: rgba(255,122,0,.06); }
     .btn-icon-edit:hover { background: rgba(255,122,0,.15); }
@@ -370,6 +401,8 @@ function emptyModel(): Partial<LLMModel> {
     .btn-icon-test { color: #ff7a00; border-color: rgba(255,122,0,.3); background: rgba(255,122,0,.04); }
     .btn-icon-test:hover { background: rgba(255,122,0,.12); }
     .btn-icon-test:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-icon-default { color: #b45309; border-color: rgba(245,158,11,.4); background: rgba(245,158,11,.08); }
+    .btn-icon-default:hover { background: rgba(245,158,11,.2); }
     
     .test-result-box {
       margin-top: 12px; padding: 10px 12px; border-radius: 10px; font-size: 12px; border: 1px solid;
@@ -490,6 +523,7 @@ export class LlmModelsComponent implements OnInit {
 
   activeCount = computed(() => this.models().filter(m => m.is_active).length);
   uniqueProviders = computed(() => new Set(this.models().map(m => m.provider)).size);
+  defaultModel = computed(() => this.models().find(m => m.is_default));
 
   filteredModels = computed(() => {
     const pf = this.providerFilter();
@@ -567,6 +601,16 @@ export class LlmModelsComponent implements OnInit {
         this.showSuccess(`Modèle ${res.model.is_active ? 'activé' : 'désactivé'}.`);
       },
       error: () => this.showError('Erreur lors du changement de statut.')
+    });
+  }
+
+  setDefault(m: LLMModel) {
+    this.http.patch<any>(`${this.API}/${m.id}/default`, {}, { headers: this.headers() }).subscribe({
+      next: (res) => {
+        this.loadModels();
+        this.showSuccess(`Le modèle "${res.model.name}" est désormais le modèle par défaut.`);
+      },
+      error: () => this.showError('Erreur lors de la définition du modèle par défaut.')
     });
   }
 

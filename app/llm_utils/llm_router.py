@@ -13,16 +13,20 @@ class LLMRouter:
             "deepseek": DeepSeekProvider
         }
 
-    def get_model(self, model_name: str):
+    def get_model(self, model_name: str = None):
         if not model_name:
-            model = LLMModel.query.filter_by(is_active=True).first()
+            model = LLMModel.query.filter_by(is_active=True, is_default=True).first()
+            if not model:
+                model = LLMModel.query.filter_by(is_active=True).first()
             if not model:
                 raise ValueError("No active LLM model configured in the database.")
             return model
         model = LLMModel.query.filter_by(name=model_name, is_active=True).first()
         if not model:
-            # Fallback to first active model
-            model = LLMModel.query.filter_by(is_active=True).first()
+            # Fallback to default active model or first active model
+            model = LLMModel.query.filter_by(is_active=True, is_default=True).first()
+            if not model:
+                model = LLMModel.query.filter_by(is_active=True).first()
             if not model:
                 raise ValueError(f"Model '{model_name}' not found or inactive, and no active fallback model exists.")
         return model

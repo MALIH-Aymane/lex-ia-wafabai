@@ -9,6 +9,7 @@ class LLMModel(db.Model):
     endpoint = db.Column(db.String(255), nullable=True)            # custom API base (optional)
     api_key = db.Column(db.String(255), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    is_default = db.Column(db.Boolean, default=False)
     temperature = db.Column(db.Float, default=0.7)
     max_tokens = db.Column(db.Integer, default=2048)
 
@@ -19,6 +20,7 @@ class LLMModel(db.Model):
             "provider": self.provider,
             "endpoint": self.endpoint,
             "is_active": self.is_active,
+            "is_default": self.is_default,
             "temperature": self.temperature,
             "max_tokens": self.max_tokens
         }

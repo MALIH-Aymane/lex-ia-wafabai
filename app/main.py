@@ -92,14 +92,14 @@ def create_app():
     CORS(app, resources={r"/*": {
         "origins": "*",
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }})
 
     @app.after_request
     def after_request(response):
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
         return response
 
     # Register blueprints
@@ -134,6 +134,12 @@ def create_app():
 
         try:
             db.session.execute(db.text("ALTER TABLE documents ADD COLUMN collection_name VARCHAR(255) NULL"))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        try:
+            db.session.execute(db.text("ALTER TABLE llm_models ADD COLUMN is_default TINYINT(1) DEFAULT 0"))
             db.session.commit()
         except Exception:
             db.session.rollback()

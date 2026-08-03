@@ -1212,7 +1212,15 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   loadLlmModels() {
     this.http.get<LLMModelOption[]>('http://127.0.0.1:5000/api/llm_models/llm-models/active').subscribe({
-      next: (ms) => this.llmModels.set(ms),
+      next: (ms) => {
+        this.llmModels.set(ms);
+        if (!this.selectedLlmModel && ms.length > 0) {
+          const defaultMod = ms.find((m: any) => m.is_default);
+          if (defaultMod) {
+            this.selectedLlmModel = defaultMod.name;
+          }
+        }
+      },
       error: () => {}
     });
   }
