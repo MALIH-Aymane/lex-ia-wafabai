@@ -1,0 +1,22 @@
+Prompt for Imagen / Nano Banana / Midjourney v6 / SDXL:
+
+Title: LEX-IA Landing Hero Banner - Legal AI for Banking Compliance
+
+Aspect Ratio & Size:
+- Aspect Ratio: 16:9 Landscape
+- Resolution: 3840 x 2160 (4K / 8K Ultra-HD)
+
+Primary Brand Palette:
+- Primary Color: Vibrant Warm Orange (#FF7A00 / #EA580C)
+- Base Background: Deep Executive Navy Blue (#0A1F4E / #060F26)
+- Lighting Accents: Soft Golden and Orange ambient light beams
+
+Prompt:
+"A state-of-the-art luxury 3D visual concept for an AI Legal & Banking Intelligence Platform. In the center, a majestic glowing 3D scale of justice interlocks with digital neural network nodes and glowing orange data streams. Floating glass legal document pages with subtle Moroccan geometric lattice patterns glow smoothly in the background. Deep executive navy blue backdrop (#0A1F4E) with vibrant warm orange light highlights (#FF7A00). Octane Render, 8K resolution, cinematic studio lighting, depth of field, photorealistic, premium corporate aesthetic."
+
+CRITICAL GENERATION RULES:
+- STRICTLY NO TEXT, NO LETTERS, NO WORDS, NO ALPHABET CHARACTERS, NO NUMBERS, AND NO WATERMARKS IN THE IMAGE.
+- Focus purely on 3D visual elements, glowing iconography, glass geometry, and lighting.
+
+Negative Prompt:
+"text, words, letters, font, typography, alphabet, label, watermark, logo, signature, low quality, blurry, noise, distortion, messy, dark gloomy."

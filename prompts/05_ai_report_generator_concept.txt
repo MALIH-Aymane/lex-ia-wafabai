@@ -1,0 +1,20 @@
+Prompt for Imagen / Nano Banana / Midjourney v6:
+
+Title: AI Legal Synthesis & Executive Report Concept
+
+Aspect Ratio & Size:
+- Aspect Ratio: 16:9 Landscape
+- Resolution: 3840 x 2160 (4K / 8K Ultra-HD)
+
+Primary Brand Palette:
+- Primary Accent: Warm Orange (#FF7A00)
+- Structural Palette: Executive Navy (#0A1F4E)
+
+Prompt:
+"An abstract 3D visual of legal intelligence report synthesis. Floating glass document sheets surrounded by glowing orange light rays (#FF7A00) and golden sparkles, assembling seamlessly over a sleek executive navy surface (#0A1F4E). Clean geometric design, studio lighting, Octane Render, 8K resolution, premium corporate aesthetic."
+
+CRITICAL GENERATION RULES:
+- STRICTLY NO TEXT, NO LETTERS, NO WORDS, NO ALPHABET CHARACTERS, AND NO WATERMARKS IN THE IMAGE.
+
+Negative Prompt:
+"text, words, letters, font, typography, readable text, watermark, signature, blurry, distorted."

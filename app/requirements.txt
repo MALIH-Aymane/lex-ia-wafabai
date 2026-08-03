@@ -1,0 +1,15 @@
+Flask==3.1.1
+Flask_Bcrypt==1.0.1
+Flask_JWT_Extended==4.7.1
+flask_sqlalchemy==3.1.1
+langchain==0.3.27
+langchain_chroma==0.2.5
+langchain_community==0.3.27
+langchain_huggingface==0.3.1
+pandas==2.3.1
+pymysql
+sentence-transformers
+cryptography
+chromadb
+flask_cors
+mysql-connector

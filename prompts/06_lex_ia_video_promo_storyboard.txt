@@ -1,0 +1,27 @@
+Prompt for AI Video Generators (Sora / Runway Gen-2 / Pika / Nano Banana Video):
+
+Title: LEX-IA 30-Second Commercial Promo Video Storyboard & Video Prompts
+
+Video Specifications:
+- Aspect Ratio: 16:9 Widescreen (1920x1080 / 4K 60fps)
+- Brand Colors: Warm Orange (#FF7A00) & Executive Navy Blue (#0A1F4E)
+- Visual Style: Photorealistic 3D Motion Graphics, Cinematic Lighting
+
+Scene 1 (0-5s): Executive Boardroom Context
+Camera smoothly glides across a modern executive glass boardroom in Casablanca at sunset. Warm lighting reflects off navy marble tables and glass walls.
+Video Prompt: "Cinematic camera movement across a modern luxury executive glass boardroom, warm orange sunset light streaming through windows, 4k 60fps photorealistic video, no text."
+
+Scene 2 (5-15s): AI Vector Search in Action
+Camera zooms smoothly into a floating 3D HUD visual interface. Multidimensional orange data nodes (#FF7A00) light up in deep navy space (#0A1F4E) as legal queries are processed.
+Video Prompt: "3D motion graphics zoom into abstract glowing orange neural network nodes connecting floating glass legal document icons in deep navy space, 4k 60fps, no text."
+
+Scene 3 (15-25s): Automated Legal Synthesis
+Floating 3D glass sheets and orange light beams converge gracefully to assemble a structured document folder.
+Video Prompt: "Smooth 3D motion graphics of floating glass sheets aligning with glowing orange light beams, premium corporate aesthetic, 4k 60fps, no text."
+
+Scene 4 (25-30s): Brand Finale
+Glowing 3D orange scale of justice rotates into view against a sleek navy blue background with subtle particle effects.
+Video Prompt: "Cinematic 3D animation of a glowing orange balance scale rotating smoothly in deep navy blue light, subtle particle motion, 4k 60fps, no text."
+
+CRITICAL VIDEO GENERATION RULES:
+- DO NOT INCLUDE ANY GENERATED TEXT OR WORDS INSIDE THE VIDEO SCENES. Text overlays will be added separately during video editing.

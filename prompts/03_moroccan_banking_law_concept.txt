@@ -1,0 +1,20 @@
+Prompt for Imagen / Nano Banana / Midjourney v6:
+
+Title: Moroccan Banking & Regulatory Law Concept Visual
+
+Aspect Ratio & Size:
+- Aspect Ratio: 16:9 Landscape
+- Resolution: 3840 x 2160 (4K / 8K Ultra-HD)
+
+Primary Brand Palette:
+- Primary Color: Vibrant Warm Orange (#FF7A00)
+- Secondary Tone: Executive Navy Blue (#0A1F4E) and Warm Amber
+
+Prompt:
+"An executive modern glass desk inside a high-end Casablanca executive boardroom at sunset. On the desk rests an open classic legal book seamlessly morphing into glowing holographic orange binary streams (#FF7A00) and AI data nodes. Deep navy blue background ambiance (#0A1F4E) with warm orange sunset lighting. Photorealistic architectural photography, 8K resolution, golden ratio composition."
+
+CRITICAL GENERATION RULES:
+- STRICTLY NO TEXT, NO LETTERS, NO WORDS, NO ALPHABET CHARACTERS, AND NO WATERMARKS IN THE IMAGE.
+
+Negative Prompt:
+"text, words, letters, font, typography, readable writing, watermark, logo, blurry, cheap look."

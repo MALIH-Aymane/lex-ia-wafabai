@@ -1,0 +1,20 @@
+Prompt for Imagen / Nano Banana / Midjourney v6:
+
+Title: ChromaDB Vector Embeddings & Knowledge Graph Visualization
+
+Aspect Ratio & Size:
+- Aspect Ratio: 16:9 Landscape
+- Resolution: 3840 x 2160 (4K / 8K Ultra-HD)
+
+Primary Brand Palette:
+- Primary Accent: Glowing Warm Orange (#FF7A00)
+- Space Background: Deep Executive Navy Blue (#0A1F4E / #060F26)
+
+Prompt:
+"A breathtaking 3D visualization of dense vector embedding space representing legal document paragraphs. Hundreds of multidimensional glowing orange data points (#FF7A00) connected by fine glowing orange and navy similarity lines, forming a complex 3D constellation in deep navy space (#0A1F4E). Sci-fi analytical graphics, Octane render, 8K resolution, crisp details."
+
+CRITICAL GENERATION RULES:
+- STRICTLY NO TEXT, NO LETTERS, NO WORDS, NO ALPHABET, NO NUMBERS, AND NO WATERMARKS IN THE PICTURE.
+
+Negative Prompt:
+"text, words, letters, font, typography, watermark, logo, signature, noise, distortion."

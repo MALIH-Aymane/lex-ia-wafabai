@@ -1,0 +1,21 @@
+Prompt for Imagen / Nano Banana / Midjourney v6:
+
+Title: LEX-IA Legal AI Dashboard Concept Visual
+
+Aspect Ratio & Size:
+- Aspect Ratio: 16:9 Landscape
+- Resolution: 3840 x 2160 (4K / 8K Ultra-HD)
+
+Primary Brand Palette:
+- Primary Color: Vibrant Warm Orange (#FF7A00)
+- Background: Executive Navy Blue (#0A1F4E)
+
+Prompt:
+"A futuristic 3D glassmorphism dashboard interface floating in dynamic perspective space. The panel displays abstract glowing metric charts, data nodes, and semantic score indicators emitting warm orange light (#FF7A00) against a deep navy blue background (#0A1F4E). High tech corporate analytics, glass layers, soft ambient reflections, 8K resolution, Unreal Engine 5 render, cinematic lighting."
+
+CRITICAL GENERATION RULES:
+- STRICTLY NO TEXT, NO LETTERS, NO WORDS, NO NUMBERS, AND NO WATERMARKS IN THE PICTURE.
+- All dashboard UI elements should be depicted using abstract geometric shapes, glowing lines, charts, and icons only.
+
+Negative Prompt:
+"text, words, letters, font, typography, readable text, watermark, signature, blurry, low resolution."
