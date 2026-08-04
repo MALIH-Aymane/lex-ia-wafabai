@@ -184,7 +184,10 @@ interface ResultGroup {
               <span class="group-subtitle">{{ g.count }} extrait(s) pertinent(s)</span>
             </div>
           </div>
-          <div class="group-header-right">
+          <div class="group-header-right" style="display:flex; align-items:center; gap:10px">
+            <button class="btn btn-outline btn-xs btn-group-select" (click)="toggleSelectGroup(g)">
+              {{ isGroupSelected(g) ? '✕ Désélectionner ce groupe' : '☑️ Sélectionner tout le groupe' }}
+            </button>
             <span class="badge badge-score-max">Score Max: {{ (g.maxScore * 100).toFixed(0) }}%</span>
           </div>
         </div>
@@ -989,6 +992,7 @@ interface ResultGroup {
     .group-title-text { font-size: 15px; font-weight: 700; color: var(--navy); margin: 0; }
     .group-subtitle { font-size: 12px; color: var(--text-muted); }
     .badge-score-max { background: var(--navy); color: #ffffff; font-size: 11px; }
+    .btn-group-select { font-size: 11.5px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; font-weight: 600; }
 
     .alert-error {
       background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
@@ -1323,6 +1327,25 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.selectedRefItemsMap.set(r.result_id, r);
       });
     }
+  }
+
+  isGroupSelected(g: ResultGroup): boolean {
+    if (!g || !g.results || g.results.length === 0) return false;
+    return g.results.every(r => this.selectedReferences.has(r.result_id));
+  }
+
+  toggleSelectGroup(g: ResultGroup) {
+    if (!g || !g.results) return;
+    const allSelected = this.isGroupSelected(g);
+    g.results.forEach(r => {
+      if (allSelected) {
+        this.selectedReferences.delete(r.result_id);
+        this.selectedRefItemsMap.delete(r.result_id);
+      } else {
+        this.selectedReferences.add(r.result_id);
+        this.selectedRefItemsMap.set(r.result_id, r);
+      }
+    });
   }
 
   // --- Enlarged Detail Modal Methods ---
