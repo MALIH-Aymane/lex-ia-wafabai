@@ -184,10 +184,7 @@ interface ResultGroup {
               <span class="group-subtitle">{{ g.count }} extrait(s) pertinent(s)</span>
             </div>
           </div>
-          <div class="group-header-right" style="display:flex; align-items:center; gap:10px">
-            <button class="btn btn-outline btn-xs btn-group-select" (click)="toggleSelectGroup(g)">
-              {{ isGroupSelected(g) ? '✕ Désélectionner ce groupe' : '☑️ Sélectionner tout le groupe' }}
-            </button>
+          <div class="group-header-right">
             <span class="badge badge-score-max">Score Max: {{ (g.maxScore * 100).toFixed(0) }}%</span>
           </div>
         </div>
@@ -992,7 +989,6 @@ interface ResultGroup {
     .group-title-text { font-size: 15px; font-weight: 700; color: var(--navy); margin: 0; }
     .group-subtitle { font-size: 12px; color: var(--text-muted); }
     .badge-score-max { background: var(--navy); color: #ffffff; font-size: 11px; }
-    .btn-group-select { font-size: 11.5px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; font-weight: 600; }
 
     .alert-error {
       background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.2);
@@ -1068,6 +1064,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   saveError = signal('');
   questionId = signal<number | null>(null);
   private initialQuestionId: number | null = null;
+  private loadedQuestionText = '';
 
   // Filters
   showFilters = signal(false);
@@ -1184,6 +1181,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       if (params['question_id']) {
         this.initialQuestionId = Number(params['question_id']);
         this.questionId.set(this.initialQuestionId);
+        this.loadedQuestionText = (params['q'] ?? '').trim();
       }
       if (params['q']) {
         this.query = params['q'];
@@ -1277,6 +1275,18 @@ export class SearchComponent implements OnInit, OnDestroy {
       payload.model_name = this.selectedLlmModel;
     }
 
+    // Si la recherche rejoue une question deja enregistree (relance depuis
+    // l'historique) on renvoie son id : le backend la reutilise au lieu de
+    // creer un doublon. Des que le texte change, on repart sur une nouvelle.
+    const currentQuestionId = this.questionId();
+    if (currentQuestionId !== null && this.query.trim() === this.loadedQuestionText) {
+      payload.question_id = currentQuestionId;
+    } else {
+      this.questionId.set(null);
+      this.initialQuestionId = null;
+      this.loadedQuestionText = '';
+    }
+
     this.http.post<any>('http://127.0.0.1:5000/api/recherche/recherche_simple', payload).subscribe({
       next: (res) => {
         const hits = res.results ?? res.result_qdrant ?? [];
@@ -1288,6 +1298,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         } else if (res.question?.id) {
           this.questionId.set(res.question.id);
         }
+        this.loadedQuestionText = this.query.trim();
       },
       error: (err) => {
         this.error.set(err.error?.error ?? 'Erreur de recherche. Veuillez réessayer.');
@@ -1327,25 +1338,6 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.selectedRefItemsMap.set(r.result_id, r);
       });
     }
-  }
-
-  isGroupSelected(g: ResultGroup): boolean {
-    if (!g || !g.results || g.results.length === 0) return false;
-    return g.results.every(r => this.selectedReferences.has(r.result_id));
-  }
-
-  toggleSelectGroup(g: ResultGroup) {
-    if (!g || !g.results) return;
-    const allSelected = this.isGroupSelected(g);
-    g.results.forEach(r => {
-      if (allSelected) {
-        this.selectedReferences.delete(r.result_id);
-        this.selectedRefItemsMap.delete(r.result_id);
-      } else {
-        this.selectedReferences.add(r.result_id);
-        this.selectedRefItemsMap.set(r.result_id, r);
-      }
-    });
   }
 
   // --- Enlarged Detail Modal Methods ---

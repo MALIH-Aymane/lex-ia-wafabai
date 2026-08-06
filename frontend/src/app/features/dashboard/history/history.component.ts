@@ -136,7 +136,7 @@ export interface HistoryPaginatedResponse {
             <td class="col-actions text-right">
               <div class="action-buttons">
                 <!-- Relaunch search -->
-                <button class="action-btn btn-search" (click)="relaunchSearch(item.texte)" title="Rechercher à nouveau">
+                <button class="action-btn btn-search" (click)="relaunchSearch(item)" title="Rechercher à nouveau">
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                   Rechercher
                 </button>
@@ -396,8 +396,12 @@ export class HistoryComponent implements OnInit {
     return list.length > 0 ? list[0].date : '';
   }
 
-  relaunchSearch(queryText: string) {
-    this.router.navigate(['/dashboard/search'], { queryParams: { q: queryText } });
+  relaunchSearch(item: QuestionHistoryItem) {
+    // On transmet l'id ET le texte : le backend reutilisera la question
+    // existante au lieu d'en creer une nouvelle a chaque relance.
+    this.router.navigate(['/dashboard/search'], {
+      queryParams: { q: item.texte, question_id: item.id }
+    });
   }
 
   sendToExpert(item: QuestionHistoryItem) {

@@ -14,7 +14,7 @@ class Question(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
-    texte = db.Column(db.String(255))
+    texte = db.Column(db.Text)
     user = db.Column(db.String(255))
     filters = db.Column(db.Text)
     langue = db.Column(db.Enum(Langue), nullable=False)
