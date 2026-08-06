@@ -1,0 +1,101 @@
+.home-page { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── Welcome Banner (default) ───────────────────── */
+.welcome-banner { border-radius: 20px; padding: 36px 40px; position: relative; overflow: hidden; }
+.orb-w1 { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: rgba(0,205,182,.15); filter: blur(60px); right: -60px; top: -60px; pointer-events: none; }
+.welcome-content { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; position: relative; z-index: 1; }
+.welcome-text h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+.welcome-text p { font-size: 15px; color: rgba(255,255,255,.7); line-height: 1.6; }
+.welcome-text strong { color: #ff7a00; }
+
+/* ── Legal Banner ────────────────────────────────── */
+.legal-banner {
+  background: linear-gradient(135deg, #0a1f4e 0%, #0d2f6b 50%, #1a3a7a 100%) !important;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.orb-w2 { position: absolute; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,122,0,.12); filter: blur(60px); left: -40px; bottom: -40px; pointer-events: none; }
+.role-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; background: rgba(255,122,0,.2); border: 1px solid rgba(255,122,0,.4);
+  border-radius: 99px; font-size: 12px; font-weight: 700; color: #ff9a3c;
+  margin-bottom: 12px;
+}
+.banner-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-outline-light {
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.3);
+  color: #fff; padding: 12px 22px; border-radius: 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-outline-light:hover { background: rgba(255,255,255,.15); }
+
+/* ── Stats ───────────────────────────────────────── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.stat-card {
+  background: var(--bg-white); border-radius: var(--radius-lg); padding: 20px 24px;
+  border: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
+  box-shadow: var(--shadow-sm); transition: var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.stat-card-legal { border-left: 3px solid #ff7a00; }
+.stat-icon { font-size: 28px; width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.si-teal   { background: rgba(0,166,147,.1); }
+.si-navy   { background: rgba(10,31,78,.08); }
+.si-amber  { background: rgba(245,158,11,.1); }
+.si-purple { background: rgba(99,102,241,.1); }
+.si-orange { background: rgba(255,122,0,.1); }
+.stat-body { flex: 1; }
+.stat-val { font-size: 24px; font-weight: 700; color: var(--navy); font-family: 'Playfair Display', serif; }
+.stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.stat-trend { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 2px; }
+.stat-trend.up { color: var(--success); }
+.stat-trend.down { color: var(--danger); }
+
+/* ── Content Grid ────────────────────────────────── */
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-header h3 { font-size: 16px; color: var(--navy); }
+
+/* ── Quick Actions ───────────────────────────────── */
+.quick-actions { display: flex; flex-direction: column; gap: 10px; }
+.quick-action {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px; border-radius: var(--radius); border: 1px solid var(--border-light);
+  transition: var(--transition); cursor: pointer; text-decoration: none;
+}
+.quick-action:hover { background: var(--bg); border-color: rgba(0,166,147,.3); transform: translateX(4px); }
+.quick-action-legal { border-color: rgba(255,122,0,.25); background: rgba(255,122,0,.03); }
+.quick-action-legal:hover { background: rgba(255,122,0,.08) !important; border-color: rgba(255,122,0,.5) !important; }
+.qa-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.qa-teal   { background: rgba(0,166,147,.1); }
+.qa-navy   { background: rgba(10,31,78,.08); }
+.qa-purple { background: rgba(99,102,241,.1); }
+.qa-amber  { background: rgba(245,158,11,.1); }
+.qa-legal  { background: rgba(255,122,0,.12); }
+.qa-body { flex: 1; }
+.qa-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.qa-desc  { font-size: 12px; color: var(--text-muted); }
+.qa-arrow { color: var(--text-light); flex-shrink: 0; }
+
+/* ── Activity ────────────────────────────────────── */
+.activity-list { display: flex; flex-direction: column; gap: 14px; }
+.activity-item { display: flex; align-items: flex-start; gap: 12px; }
+.activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.dot-search { background: var(--primary); }
+.dot-juri   { background: var(--navy); }
+.dot-doc    { background: var(--warning); }
+.dot-user   { background: var(--info); }
+.activity-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.activity-time  { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.empty-activity { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 0; }
+
+/* ── Scope Notice ────────────────────────────────── */
+.scope-notice {
+  margin-top: 20px; display: flex; align-items: flex-start; gap: 8px;
+  padding: 12px 14px; background: rgba(10,31,78,.05); border: 1px solid rgba(10,31,78,.1);
+  border-radius: 10px; font-size: 12px; color: #6c757d; line-height: 1.5;
+}
+.scope-notice svg { flex-shrink: 0; margin-top: 2px; color: #0a1f4e; }
+
+/* ── Badges ──────────────────────────────────────── */
+.badge-legal { background: rgba(255,122,0,.15); color: #ff7a00; border: 1px solid rgba(255,122,0,.3); padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }

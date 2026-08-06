@@ -1,0 +1,260 @@
+<div class="juri-page">
+
+  <!-- HERO SEARCH HEADER -->
+  <div class="search-hero card animate-fadeInUp">
+    <div class="hero-top-row">
+      <div class="hero-brand">
+        <span class="hero-icon">⚖️</span>
+        <div>
+          <h2>Jurisprudence & Précédents Juridiques</h2>
+          <p *ngIf="canManage()">Gérez, modifiez et publiez les réponses juridiques validées.</p>
+          <p *ngIf="!canManage()">Consultez les réponses et avis juridiques officiels validés.</p>
+        </div>
+      </div>
+
+      <!-- Add New Response (Admin / Responsable Juridique only) -->
+      <button class="btn btn-primary btn-add-juri" *ngIf="canManage()" (click)="showNewModal.set(true)">
+        + Nouvelle réponse
+      </button>
+    </div>
+
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Posez une question juridique ou saisissez des mots-clés..."
+          [(ngModel)]="query"
+          (keyup.enter)="search()"
+        />
+        <button class="btn btn-primary btn-search" (click)="search()" [disabled]="loading()">
+          <span class="spinner-sm" *ngIf="loading()"></span>
+          <span *ngIf="!loading()">Rechercher</span>
+        </button>
+      </div>
+
+      <!-- Quick Query Chips -->
+      <div class="suggested-chips">
+        <span class="suggest-label">Suggestions :</span>
+        <button class="chip-tag" *ngFor="let q of suggestedQueries" (click)="useQuery(q)">
+          {{ q }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS BAR & FILTERS -->
+  <div class="results-bar animate-fadeInUp" *ngIf="hasSearched() || results().length > 0">
+    <div class="results-info">
+      <span class="results-count"><strong>{{ filteredResults().length }}</strong> jurisprudence(s) disponible(s)</span>
+      <span class="query-badge" *ngIf="query">Recherche : « {{ query }} »</span>
+    </div>
+
+    <!-- Status Filter (Admin & Legal Manager) -->
+    <div class="status-filters" *ngIf="canManage()">
+      <button class="filter-tab" [class.active]="statusFilter() === 'ALL'" (click)="statusFilter.set('ALL')">Toutes</button>
+      <button class="filter-tab" [class.active]="statusFilter() === 'PUBLISHED'" (click)="statusFilter.set('PUBLISHED')">Publiées</button>
+      <button class="filter-tab" [class.active]="statusFilter() === 'DRAFT'" (click)="statusFilter.set('DRAFT')">Brouillons</button>
+      <button class="filter-tab" [class.active]="statusFilter() === 'ARCHIVED'" (click)="statusFilter.set('ARCHIVED')">Archivées</button>
+    </div>
+  </div>
+
+  <!-- REQUEST FEEDBACK SUCCESS BANNER -->
+  <div class="request-success-alert animate-fadeInUp" *ngIf="requestSuccess()">
+    <div style="display:flex; align-items:center; gap:10px">
+      <span style="font-size:20px">✓</span>
+      <div>
+        <strong>Demande transmise au Responsable Juridique !</strong>
+        <p style="margin:2px 0 0; font-size:12.5px; opacity:0.9">Votre question a été enregistrée. L'équipe juridique examinera votre demande et rédigera la réponse de conformité.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="loading()">
+    <span class="spinner" style="width:40px; height:40px"></span>
+    <h4>Recherche vectorielle dans la jurisprudence marocaine...</h4>
+    <p>Analyse de la similarité sémantique des questions répertoriées.</p>
+  </div>
+
+  <!-- RESULTS GRID (3-CARD LAYOUT) -->
+  <div class="juri-grid" *ngIf="!loading() && filteredResults().length > 0">
+    <div class="juri-card card card-hover animate-fadeInUp"
+         *ngFor="let item of filteredResults(); let i = index"
+         [style.animation-delay]="i * 0.05 + 's'"
+         (click)="openDetailModal(item)">
+
+      <div class="juri-card-header">
+        <span class="score-badge" [class]="getScoreClass(item.score)">
+          {{ getScorePercentage(item.score) }} pertinence
+        </span>
+        <span class="badge" [class]="statusBadge(item.reponse.status || 'DRAFT')">
+          {{ item.reponse.status || 'DRAFT' }}
+        </span>
+      </div>
+
+      <h4 class="juri-question">
+        {{ item.reponse.question || ('Jurisprudence #' + (item.reponse.question_id || item.result_id)) }}
+      </h4>
+
+      <p class="juri-excerpt">
+        {{ truncateText(item.reponse.content || '', 220) }}
+      </p>
+
+      <div class="juri-card-footer">
+        <div class="footer-meta">
+          <span class="meta-item">📅 {{ formatDate(item.reponse.created_at) }}</span>
+          <span class="meta-item">📎 {{ getSourcesCount(item.reponse.sources) }} source(s)</span>
+        </div>
+        <button class="btn btn-outline btn-xs" (click)="$event.stopPropagation(); openDetailModal(item)">
+          Consulter le Rapport
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMPLE USER LEGAL REQUEST CALLOUT CARD -->
+  <div class="legal-request-card card animate-fadeInUp" *ngIf="!canManage() && !loading()">
+    <div class="request-card-body">
+      <div class="request-icon">📩</div>
+      <div class="request-info">
+        <h4>Vous ne trouvez pas la réponse exacte à votre question ?</h4>
+        <p>Transmettez directement votre question au <strong>Responsable Juridique</strong>. Elle sera étudiée et ajoutée à la base de jurisprudence après validation.</p>
+      </div>
+      <button class="btn btn-primary btn-submit-req" (click)="submitQuestionToLegal()" [disabled]="requestSubmitting() || !query.trim()">
+        <span class="spinner-sm" *ngIf="requestSubmitting()"></span>
+        <span *ngIf="!requestSubmitting()">Demander l'avis au Responsable Juridique</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state card" *ngIf="!loading() && filteredResults().length === 0">
+    <div class="empty-icon">⚖️</div>
+    <h3>Aucune jurisprudence trouvée</h3>
+    <p *ngIf="hasSearched()">Aucun précédent juridique ne correspond à votre recherche.</p>
+    <p *ngIf="!hasSearched()">Saisissez une question dans la barre ci-dessus pour lancer la recherche.</p>
+  </div>
+
+
+  <!-- FULL JURISPRUDENCE REPORT DETAIL MODAL -->
+  <div class="modal-overlay" *ngIf="activeDetailItem()" (click)="closeDetailModal()">
+    <div class="modal-box report-modal-box animate-fadeInUp" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div class="modal-icon-badge">⚖️</div>
+          <div>
+            <h3 style="margin:0; font-size:18px; color:var(--navy)">Rapport de Jurisprudence Validé</h3>
+            <span class="text-muted" style="font-size:12px">Précédent réglementaire répertorié dans la base</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeDetailModal()">✕</button>
+      </div>
+
+      <div class="modal-body-content report-body">
+        <!-- Question banner -->
+        <div class="juri-question-banner">
+          <span class="q-label">QUESTION POSÉE</span>
+          <h4 class="q-text">« {{ activeDetailItem()?.reponse?.question || 'Question juridique' }} »</h4>
+          <div class="q-meta">
+            <span class="badge" [class]="statusBadge(activeDetailItem()?.reponse?.status || 'DRAFT')">
+              {{ activeDetailItem()?.reponse?.status || 'DRAFT' }}
+            </span>
+            <span>📅 {{ formatDate(activeDetailItem()?.reponse?.created_at) }}</span>
+            <span>📎 {{ getSourcesCount(activeDetailItem()?.reponse?.sources) }} référence(s) liée(s)</span>
+          </div>
+        </div>
+
+        <!-- Management Toolbar (Admin & Responsable Juridique only) -->
+        <div class="admin-manage-bar" *ngIf="canManage()">
+          <span class="manage-title">Gestion de la jurisprudence :</span>
+          <div class="manage-actions">
+            <button class="btn btn-xs"
+                    [class.btn-primary]="activeDetailItem()?.reponse?.status !== 'PUBLISHED'"
+                    [class.btn-outline]="activeDetailItem()?.reponse?.status === 'PUBLISHED'"
+                    (click)="changeStatus(activeDetailItem()!, 'PUBLISHED')">
+              ✓ {{ activeDetailItem()?.reponse?.status === 'PUBLISHED' ? 'Publiée' : 'Publier' }}
+            </button>
+            <button class="btn btn-outline btn-xs"
+                    *ngIf="activeDetailItem()?.reponse?.status !== 'DRAFT'"
+                    (click)="changeStatus(activeDetailItem()!, 'DRAFT')">
+              Mettre en Brouillon
+            </button>
+            <button class="btn btn-outline btn-xs"
+                    *ngIf="activeDetailItem()?.reponse?.status !== 'ARCHIVED'"
+                    (click)="changeStatus(activeDetailItem()!, 'ARCHIVED')">
+              Archiver
+            </button>
+            <button class="btn btn-danger-ghost btn-xs" (click)="deleteJurisprudence(activeDetailItem()!)">
+              🗑️ Supprimer
+            </button>
+          </div>
+        </div>
+
+        <!-- Report content -->
+        <div class="report-content-pre" [innerHTML]="getFormattedReportContent(activeDetailItem()!)"></div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="modal-actions" style="margin-top:20px; border-top:1px solid var(--border-light); padding-top:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
+        <div class="copy-status" *ngIf="copySuccess()">
+          <span style="color:#059669; font-size:13px; font-weight:600">✓ Copié dans le presse-papier !</span>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-left:auto; align-items:center">
+          <button class="btn btn-ghost btn-sm" (click)="copyReportToClipboard()" title="Copier le texte">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copier
+          </button>
+          <button class="btn btn-outline" (click)="downloadReportPdf()" title="Télécharger en PDF">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Télécharger PDF
+          </button>
+          <button class="btn btn-outline" (click)="printReport()" title="Imprimer">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Imprimer
+          </button>
+          <button class="btn btn-primary" (click)="closeDetailModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW RESPONSE CREATION MODAL (Admin / Responsable Juridique only) -->
+  <div class="modal-overlay" *ngIf="showNewModal()" (click)="showNewModal.set(false)">
+    <div class="modal-box animate-fadeInUp" (click)="$event.stopPropagation()" style="max-width:540px">
+      <div class="modal-header">
+        <h3 style="font-size:18px; color:var(--navy); margin:0">Nouvelle Réponse Juridique</h3>
+        <button class="modal-close" (click)="showNewModal.set(false)">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px; margin-top:16px">
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600; font-size:13px">ID de la question</label>
+          <input class="form-control" type="number" [(ngModel)]="newForm.question_id" placeholder="Ex: 42" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600; font-size:13px">Contenu de la réponse</label>
+          <textarea class="form-control" rows="5" [(ngModel)]="newForm.content" placeholder="Saisissez la réponse juridique..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); resize:vertical"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-weight:600; font-size:13px">Statut de la publication</label>
+          <select class="form-control" [(ngModel)]="newForm.status" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border)">
+            <option value="DRAFT">Brouillon</option>
+            <option value="PUBLISHED">Publié</option>
+            <option value="ARCHIVED">Archivé</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:24px; display:flex; justify-content:flex-end; gap:10px">
+        <button class="btn btn-ghost" (click)="showNewModal.set(false)">Annuler</button>
+        <button class="btn btn-primary" (click)="submitNewResponse()">Publier la réponse</button>
+      </div>
+    </div>
+  </div>
+
+</div>

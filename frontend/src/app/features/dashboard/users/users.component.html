@@ -1,0 +1,108 @@
+<div class="users-page">
+  <div class="page-header animate-fadeInUp">
+    <div>
+      <h2>👥 Gestion des utilisateurs</h2>
+      <p>Administrez les comptes, les photos de profil et les accès à la plateforme.</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Nouvel utilisateur</button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar-row animate-fadeInUp" style="animation-delay:.06s">
+    <div class="input-wrapper" style="flex:1">
+      <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="form-control input-with-icon" [(ngModel)]="searchTerm" placeholder="Rechercher un utilisateur..." />
+    </div>
+    <select class="form-control" style="width:180px" [(ngModel)]="roleFilter">
+      <option value="">Tous les rôles</option>
+      <option value="Administrateur">Administrateur</option>
+      <option value="Responsable juridique">Resp. juridique</option>
+      <option value="Utilisateur">Utilisateur</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="card animate-fadeInUp" style="animation-delay:.12s; padding:0; overflow:hidden">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filteredUsers()">
+          <td>
+            <div class="user-cell">
+              <img *ngIf="getAvatarUrl(u)" [src]="getAvatarUrl(u)" class="user-avatar-img" alt="Avatar" />
+              <div *ngIf="!getAvatarUrl(u)" class="user-av">{{ initials(u) }}</div>
+              <div class="user-name-col">
+                <span class="user-fullname">{{ u.firstname }} {{ u.lastname }}</span>
+                <span class="user-username">&#64;{{ u.username || u.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="text-muted">{{ u.email }}</td>
+          <td><span class="badge" [class]="roleBadge(roleName(u))">{{ roleName(u) }}</span></td>
+          <td>
+            <span class="badge" [class]="u.is_blocked ? 'badge-danger' : 'badge-success'">
+              {{ u.is_blocked ? 'Bloqué' : 'Actif' }}
+            </span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-ghost btn-sm" (click)="editUser(u)">✏️</button>
+              <button class="btn btn-ghost btn-sm" (click)="deleteUser(u.id)" style="color:var(--danger)">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredUsers().length === 0">
+          <td colspan="5" class="empty-row">Aucun utilisateur trouvé.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal()" (click)="showModal.set(false)">
+    <div class="modal-box animate-fadeInUp" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editMode() ? 'Modifier' : 'Créer' }} un utilisateur</h3>
+        <button class="modal-close" (click)="showModal.set(false)">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Prénom</label>
+          <input class="form-control" [(ngModel)]="form.firstname" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input class="form-control" [(ngModel)]="form.lastname" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Email / Identifiant</label>
+          <input class="form-control" type="email" [(ngModel)]="form.email" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1" *ngIf="!editMode()">
+          <label class="form-label">Mot de passe</label>
+          <input class="form-control" type="password" [(ngModel)]="form.password" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Rôle</label>
+          <select class="form-control" [(ngModel)]="form.role">
+            <option value="Administrateur">Administrateur</option>
+            <option value="Responsable juridique">Responsable juridique</option>
+            <option value="Utilisateur">Utilisateur</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" (click)="showModal.set(false)">Annuler</button>
+        <button class="btn btn-primary" (click)="saveUser()">{{ editMode() ? 'Enregistrer' : 'Créer' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

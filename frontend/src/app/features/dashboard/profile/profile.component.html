@@ -1,0 +1,94 @@
+<div class="profile-page">
+  <div class="profile-grid">
+
+    <!-- Left: Avatar card -->
+    <div class="avatar-card card animate-fadeInUp">
+      <div class="avatar-wrapper">
+        <img *ngIf="avatarUrl()" [src]="avatarUrl()" class="avatar-img" alt="Avatar" />
+        <div *ngIf="!avatarUrl()" class="avatar-circle">{{ initials() }}</div>
+
+        <button type="button" class="avatar-edit-btn" (click)="fileInput.click()" title="Changer la photo de profil">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+        <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" style="display:none" />
+      </div>
+
+      <button type="button" class="btn-change-photo" (click)="fileInput.click()" [disabled]="avatarUploading()">
+        <span class="spinner" *ngIf="avatarUploading()"></span>
+        <span *ngIf="!avatarUploading()">📷 {{ avatarUrl() ? 'Modifier la photo' : 'Ajouter une photo' }}</span>
+      </button>
+
+      <div class="alert-success-sm" *ngIf="avatarSuccess()">{{ avatarSuccess() }}</div>
+      <div class="alert-error-sm" *ngIf="avatarError()">{{ avatarError() }}</div>
+
+      <h2 class="profile-name">{{ fullName() }}</h2>
+      <span class="badge badge-navy">{{ roleName() }}</span>
+      <p class="profile-email">{{ user()?.email }}</p>
+
+      <div class="profile-stats">
+        <div class="ps-item">
+          <span class="ps-val">—</span>
+          <span class="ps-lbl">Recherches</span>
+        </div>
+        <div class="ps-div"></div>
+        <div class="ps-item">
+          <span class="ps-val">—</span>
+          <span class="ps-lbl">Questions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Edit form -->
+    <div class="edit-card card animate-fadeInUp" style="animation-delay:.08s">
+      <div class="card-header-row">
+        <h3>Informations personnelles</h3>
+        <span class="badge badge-teal" *ngIf="saved()">✓ Sauvegardé</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Prénom</label>
+          <input class="form-control" [(ngModel)]="form.firstname" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input class="form-control" [(ngModel)]="form.lastname" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" [(ngModel)]="form.email" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Nom d'utilisateur</label>
+          <input class="form-control" [(ngModel)]="form.username" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" (click)="saveProfile()" [disabled]="loading()">
+        <span class="spinner" *ngIf="loading()"></span>
+        <span *ngIf="!loading()">Enregistrer les modifications</span>
+      </button>
+
+      <!-- Password change -->
+      <div class="divider" style="margin:28px 0">Changer le mot de passe</div>
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Mot de passe actuel</label>
+          <input class="form-control" type="password" [(ngModel)]="pw.current" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nouveau mot de passe</label>
+          <input class="form-control" type="password" [(ngModel)]="pw.new_password" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer</label>
+          <input class="form-control" type="password" [(ngModel)]="pw.confirm" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="form-error" *ngIf="pwError()">{{ pwError() }}</div>
+      <button class="btn btn-outline" (click)="changePassword()">Modifier le mot de passe</button>
+    </div>
+
+  </div>
+</div>

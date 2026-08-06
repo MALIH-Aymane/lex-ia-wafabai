@@ -1,0 +1,105 @@
+<div class="user-requests-page">
+
+  <!-- HERO HEADER -->
+  <div class="hero-card card animate-fadeInUp">
+    <div class="hero-content">
+      <div class="hero-icon-box">📨</div>
+      <div>
+        <h2>Mes Demandes Juridiques</h2>
+        <p>Consultez l'état de vos questions transmises aux experts et découvrez les réponses officielles.</p>
+      </div>
+    </div>
+
+    <!-- STATS PILLS -->
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="stat-num">{{ pendingCount() }}</span>
+        <span class="stat-label">En attente d'expert</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">{{ processedCount() }}</span>
+        <span class="stat-label">Réponses validées</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">{{ questions().length }}</span>
+        <span class="stat-label">Total sollicitations</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER & SEARCH BAR -->
+  <div class="filter-bar animate-fadeInUp">
+    <div class="search-wrap">
+      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher dans mes demandes..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+
+    <div class="status-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'PENDING'" (click)="activeTab.set('PENDING')">
+        En attente ({{ pendingCount() }})
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'PROCESSED'" (click)="activeTab.set('PROCESSED')">
+        Traitées ({{ processedCount() }})
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'ALL'" (click)="activeTab.set('ALL')">
+        Toutes ({{ questions().length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="loading()">
+    <span class="spinner" style="width:40px; height:40px"></span>
+    <h4>Chargement de vos demandes...</h4>
+  </div>
+
+  <!-- REQUESTS GRID -->
+  <div class="requests-grid" *ngIf="!loading() && filteredQuestions().length > 0">
+    <div class="request-card card card-hover animate-fadeInUp"
+         *ngFor="let q of filteredQuestions(); let i = index"
+         [style.animation-delay]="i * 0.05 + 's'">
+
+      <div class="req-header">
+        <div class="req-id-badge">Question #{{ q.id }}</div>
+        <span class="badge" [class]="getStatusBadgeClass(q.status)">
+          {{ formatStatusLabel(q.status) }}
+        </span>
+      </div>
+
+      <div class="req-question">
+        « {{ q.texte }} »
+      </div>
+
+      <div class="req-user-meta">
+        <span class="date-chip">📅 {{ q.date || 'Récemment' }}</span>
+        <button *ngIf="q.status === 'Sent to expert' || q.status === 'SENT_TO_EXPERT'"
+                class="btn-delete-sm" 
+                (click)="deleteQuestion(q.id)"
+                title="Annuler cette demande">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          Supprimer
+        </button>
+      </div>
+
+      <div class="req-actions" *ngIf="q.status === 'Jurisprudence' || q.status === 'JURISPRUDENCE'" style="margin-top: 10px;">
+        <button class="btn btn-primary btn-sm btn-block" style="width: 100%;" (click)="viewResponse(q)">
+          👁️ Consulter la réponse
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state card" *ngIf="!loading() && filteredQuestions().length === 0">
+    <div class="empty-icon">📂</div>
+    <h3>Aucune demande trouvée</h3>
+    <p>Vous n'avez soumis aucune question nécessitant l'avis d'un expert ou aucune demande ne correspond à votre recherche.</p>
+  </div>
+</div>

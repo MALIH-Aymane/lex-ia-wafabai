@@ -1,0 +1,531 @@
+<div class="search-page">
+  <!-- Search Hero -->
+  <div class="search-hero card animate-fadeInUp">
+    <div class="search-bar">
+      <input class="search-input" type="text" [(ngModel)]="query"
+        placeholder="Ex: Quelles sont les obligations de fonds propres pour une banque ?"
+        (keyup.enter)="search()" />
+      <button class="filter-toggle-btn"
+              (click)="toggleFilters()"
+              [class.active]="showFilters() || selectedCollection || selectedGrouping || selectedGroupingMode() !== 'collection'">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Filtres
+        <span class="filter-count-badge" *ngIf="activeFilterCount() > 0">{{ activeFilterCount() }}</span>
+      </button>
+      <button class="btn btn-primary search-btn" (click)="search()" [disabled]="loading() || !query.trim()">
+        <span class="spinner" *ngIf="loading()"></span>
+        <ng-container *ngIf="!loading()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Rechercher
+        </ng-container>
+      </button>
+    </div>
+
+    <!-- Active filter chips -->
+    <div class="filter-chips" *ngIf="!showFilters() && (selectedCollection || selectedGrouping || selectedGroupingMode() !== 'collection')">
+      <span class="chip chip-primary" *ngIf="selectedGroupingMode()">
+        {{ selectedGroupingMode() === 'collection' ? '📁 Groupe: Collection' : (selectedGroupingMode() === 'document' ? '📄 Groupe: Document' : (selectedGroupingMode() === 'grouping' ? '🏷️ Groupe: Grouping' : '📋 Sans Regroupement')) }}
+      </span>
+      <span class="chip chip-teal" *ngIf="selectedCollection">
+        📁 {{ selectedCollection }}
+        <button (click)="selectedCollection = ''; onCollectionChange()" class="chip-close">✕</button>
+      </span>
+      <span class="chip chip-navy" *ngIf="selectedGrouping" [title]="selectedGrouping">
+        📂 {{ formatGrouping(selectedGrouping) }}
+        <button (click)="selectedGrouping = ''" class="chip-close">✕</button>
+      </span>
+    </div>
+
+    <!-- Collapsible Filters Drawer -->
+    <div class="filters-row animate-fadeIn" *ngIf="showFilters()">
+      <!-- Grouping Mode selector (Default: Collection) -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+          Regrouper les résultats par
+        </label>
+        <select class="filter-select" [ngModel]="selectedGroupingMode()" (ngModelChange)="selectedGroupingMode.set($event)">
+          <option value="collection">📁 Collection (Par défaut)</option>
+          <option value="document">📄 Document</option>
+          <option value="grouping">🏷️ Groupe de documents (Grouping)</option>
+          <option value="none">📋 Sans regroupement (Liste à plat)</option>
+        </select>
+      </div>
+
+      <!-- Collection selector -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16M4 9h16M4 14h10"/></svg>
+          Collection
+        </label>
+        <select class="filter-select" [(ngModel)]="selectedCollection" (ngModelChange)="onCollectionChange()">
+          <option value="">Toutes les collections</option>
+          <option *ngFor="let col of collections()" [value]="col.name">{{ col.name }}</option>
+        </select>
+      </div>
+
+      <!-- Grouping selector -->
+      <div class="filter-group">
+        <label class="filter-label">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="4" rx="1"/><path d="M4 10h16M4 15h12"/></svg>
+          Filtre Groupe de documents
+        </label>
+        <select class="filter-select" [(ngModel)]="selectedGrouping">
+          <option value="">Tous les groupes</option>
+          <option *ngFor="let g of availableGroupings()" [value]="g" [title]="g">{{ formatGrouping(g) }}</option>
+        </select>
+      </div>
+
+      <!-- Results limit -->
+      <div class="filter-group filter-group-sm">
+        <label class="filter-label">Résultats</label>
+        <select class="filter-select" [(ngModel)]="limit">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+
+      <!-- LLM Model selector -->
+      <div class="filter-group" *ngIf="llmModels().length > 0">
+        <label class="filter-label">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Modèle LLM
+        </label>
+        <select class="filter-select" [(ngModel)]="selectedLlmModel">
+          <option value="">🤖 Modèle par défaut</option>
+          <option *ngFor="let m of llmModels()" [value]="m.name">{{ m.name }} ({{ m.provider }})</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="search-tags" *ngIf="!showFilters()">
+      <span class="search-tag" *ngFor="let t of suggestedQueries" (click)="useQuery(t)">{{ t }}</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="alert-error" *ngIf="error()">{{ error() }}</div>
+
+  <!-- Results Section -->
+  <div class="results-section" *ngIf="results().length > 0">
+    <div class="results-header">
+      <div class="flex-between" style="width:100%">
+        <span class="results-count">{{ results().length }} résultats trouvés ({{ groupedResults().length }} groupe(s))</span>
+
+        <div class="select-all-controls">
+          <button class="btn btn-outline btn-xs" (click)="toggleSelectAll()">
+            {{ isAllSelected() ? '✕ Tout désélectionner' : '☑️ Tout sélectionner' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="results-meta-badges" style="margin-top:8px">
+        <span class="badge badge-primary">
+          Regroupement : {{ selectedGroupingMode() === 'collection' ? 'Collection' : (selectedGroupingMode() === 'document' ? 'Document' : (selectedGroupingMode() === 'grouping' ? 'Grouping' : 'Aucun')) }}
+        </span>
+        <span class="badge badge-teal">Recherche sémantique</span>
+        <span class="badge badge-navy" *ngIf="selectedCollection">{{ selectedCollection }}</span>
+        <span class="badge badge-light" *ngIf="selectedGrouping" [title]="selectedGrouping">📂 {{ formatGrouping(selectedGrouping) }}</span>
+      </div>
+    </div>
+
+    <!-- Grouped View (Responsive 3 cards per row inside groups) -->
+    <div class="grouped-results-container" *ngIf="selectedGroupingMode() !== 'none'">
+      <div class="group-section card animate-fadeInUp"
+           *ngFor="let g of groupedResults(); let gi = index; trackBy: trackByGroup"
+           [style.animation-delay]="gi * 0.04 + 's'">
+
+        <!-- Group Header -->
+        <div class="group-header">
+          <div class="group-header-left">
+            <span class="group-icon-badge">{{ g.icon }}</span>
+            <div class="group-header-title-box">
+              <h3 class="group-title-text" [title]="g.groupKey">{{ formatGrouping(g.groupKey) }}</h3>
+              <span class="group-subtitle">{{ g.count }} extrait(s) pertinent(s)</span>
+            </div>
+          </div>
+          <div class="group-header-right">
+            <span class="badge badge-score-max">Score Max: {{ (g.maxScore * 100).toFixed(0) }}%</span>
+          </div>
+        </div>
+
+        <!-- Group Items Grid (3 cards / line responsive) -->
+        <div class="results-grid group-items-grid">
+          <div class="result-card inner-result-card card-grid-item"
+               *ngFor="let r of g.results; trackBy: trackByResult"
+               [class.selected-card]="isReferenceSelected(r.result_id)"
+               (click)="openDetailModal(r)">
+
+            <div class="card-top-content">
+              <div class="result-header">
+                <!-- Checkbox for AI Report reference selection -->
+                <label class="ref-checkbox-wrapper" (click)="$event.stopPropagation()">
+                  <input type="checkbox"
+                         [checked]="isReferenceSelected(r.result_id)"
+                         (change)="toggleSelectReference(r)" />
+                  <span class="checkbox-custom"></span>
+                </label>
+
+                <div class="score-badge" [class]="scoreClass(r.score)">
+                  {{ (r.score * 100).toFixed(0) }}%
+                </div>
+                <div class="result-meta-row">
+                  <span class="result-law">{{ r.reponse['reference'] || r.reponse['levelvalue5'] || 'Document' }}</span>
+                  <div class="result-meta-tags" *ngIf="r.reponse['grouping']">
+                    <span class="micro-badge" [title]="r.reponse['grouping']">📂 {{ formatGrouping(r.reponse['grouping']) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formatted Level Header: Label du niveau : Valeur -->
+              <div class="level-header-row" *ngIf="getFormattedLevelHeader(r) as lvl">
+                <span class="level-lbl-name">{{ lvl.label }} :</span>
+                <span class="level-lbl-value">{{ lvl.value }}</span>
+              </div>
+              <div class="level-header-row" *ngIf="!getFormattedLevelHeader(r)">
+                <span class="level-lbl-value">{{ cleanVal(r.reponse['titre'] || r.reponse['levelvalue6']) || '—' }}</span>
+              </div>
+
+              <!-- Short Content Snippet (~120 chars) -->
+              <p class="result-content-preview">
+                {{ truncate(r.reponse['contenu'] || r.reponse['paragraph'] || '', 120) }}
+              </p>
+            </div>
+
+            <div class="result-footer">
+              <div class="result-tags">
+                <span class="badge badge-navy" *ngIf="r.reponse['section'] || r.reponse['levelvalue4']">
+                  {{ cleanVal(r.reponse['section'] || r.reponse['levelvalue4']) }}
+                </span>
+                <span class="badge badge-teal" *ngIf="r.reponse['numero_article'] || r.reponse['levelvalue6']">
+                  Art. {{ cleanVal(r.reponse['numero_article'] || r.reponse['levelvalue6']) }}
+                </span>
+                <span class="badge badge-light" *ngIf="r.reponse['pages']">p. {{ cleanVal(r.reponse['pages']) }}</span>
+              </div>
+
+              <button
+                *ngIf="r.reponse['hyperlink'] || r.reponse['document_url']"
+                (click)="$event.stopPropagation(); openPdf(r)"
+                class="result-link" title="Consulter la source PDF">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                PDF
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flat View (3 cards / line responsive) -->
+    <div class="results-grid" *ngIf="selectedGroupingMode() === 'none'">
+      <div class="result-card card card-grid-item animate-fadeInUp"
+           *ngFor="let r of results(); let i = index; trackBy: trackByResult"
+           [class.selected-card]="isReferenceSelected(r.result_id)"
+           (click)="openDetailModal(r)"
+           [style.animation-delay]="i * 0.03 + 's'">
+
+        <div class="card-top-content">
+          <div class="result-header">
+            <!-- Checkbox for AI Report reference selection -->
+            <label class="ref-checkbox-wrapper" (click)="$event.stopPropagation()">
+              <input type="checkbox"
+                     [checked]="isReferenceSelected(r.result_id)"
+                     (change)="toggleSelectReference(r)" />
+              <span class="checkbox-custom"></span>
+            </label>
+
+            <div class="score-badge" [class]="scoreClass(r.score)">
+              {{ (r.score * 100).toFixed(0) }}%
+            </div>
+            <div class="result-meta-row">
+              <span class="result-law">{{ r.reponse['reference'] || r.reponse['levelvalue5'] || 'Document' }}</span>
+              <div class="result-meta-tags" *ngIf="r.reponse['grouping']">
+                <span class="micro-badge" [title]="r.reponse['grouping']">📂 {{ formatGrouping(r.reponse['grouping']) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formatted Level Header: Label du niveau : Valeur -->
+          <div class="level-header-row" *ngIf="getFormattedLevelHeader(r) as lvl">
+            <span class="level-lbl-name">{{ lvl.label }} :</span>
+            <span class="level-lbl-value">{{ lvl.value }}</span>
+          </div>
+          <div class="level-header-row" *ngIf="!getFormattedLevelHeader(r)">
+            <span class="level-lbl-value">{{ cleanVal(r.reponse['titre'] || r.reponse['levelvalue6']) || '—' }}</span>
+          </div>
+
+          <!-- Short Content Snippet (~120 chars) -->
+          <p class="result-content-preview">
+            {{ truncate(r.reponse['contenu'] || r.reponse['paragraph'] || '', 120) }}
+          </p>
+        </div>
+
+        <div class="result-footer">
+          <div class="result-tags">
+            <span class="badge badge-navy" *ngIf="r.reponse['section'] || r.reponse['levelvalue4']">
+              {{ cleanVal(r.reponse['section'] || r.reponse['levelvalue4']) }}
+            </span>
+            <span class="badge badge-teal" *ngIf="r.reponse['numero_article'] || r.reponse['levelvalue6']">
+              Art. {{ cleanVal(r.reponse['numero_article'] || r.reponse['levelvalue6']) }}
+            </span>
+            <span class="badge badge-light" *ngIf="r.reponse['pages']">p. {{ cleanVal(r.reponse['pages']) }}</span>
+          </div>
+
+          <button
+            *ngIf="r.reponse['hyperlink'] || r.reponse['document_url']"
+            (click)="$event.stopPropagation(); openPdf(r)"
+            class="result-link" title="Consulter la source PDF">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            PDF
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!loading() && results().length === 0 && hasSearched()">
+    <div class="empty-icon">🔍</div>
+    <h3>Aucun résultat trouvé</h3>
+    <p>Essayez de reformuler votre question, de changer de collection ou de supprimer les filtres.</p>
+  </div>
+
+  <!-- Idle state -->
+  <div class="idle-state" *ngIf="!hasSearched() && !loading()">
+    <div class="idle-icon">⚖️</div>
+    <h3>Prêt pour votre recherche</h3>
+    <p>Entrez votre question juridique ci-dessus pour commencer.</p>
+  </div>
+</div>
+
+<!-- FLOATING ACTION BAR FOR SELECTED REFERENCES & AI REPORT GENERATION -->
+<div class="floating-ai-bar animate-fadeInUp" *ngIf="selectedReferences.size > 0">
+  <!-- Row 1: Info & Model Select -->
+  <div class="floating-row-top">
+    <div class="floating-bar-info">
+      <div class="floating-icon-box">📌</div>
+      <div class="floating-text-box">
+        <strong>{{ selectedReferences.size }} référence(s) sélectionnée(s)</strong>
+        <span class="floating-sub">Textes inclus dans la synthèse juridique IA</span>
+      </div>
+    </div>
+
+    <div class="floating-model-group" *ngIf="llmModels().length > 0">
+      <span class="floating-model-label">Modèle LLM :</span>
+      <select class="floating-model-select" [(ngModel)]="selectedLlmModel">
+        <option value="" style="color:#0a1f4e; background:#fff">🤖 Modèle par défaut</option>
+        <option *ngFor="let m of llmModels()" [value]="m.name" style="color:#0a1f4e; background:#fff">{{ m.name }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Row 2: Deselect & Primary CTA -->
+  <div class="floating-row-bottom">
+    <button class="btn btn-floating-ghost" (click)="selectedReferences.clear(); selectedRefItemsMap.clear()">
+      Désélectionner tout
+    </button>
+
+    <button class="btn btn-floating-generate" (click)="openAiReportModal()" [disabled]="reportLoading()">
+      <span class="spinner-sm" *ngIf="reportLoading()"></span>
+      <span *ngIf="!reportLoading()">🤖 Générer le Rapport IA ({{ selectedReferences.size }})</span>
+    </button>
+  </div>
+</div>
+
+<!-- ENLARGED CARD DETAIL MODAL -->
+<div class="modal-overlay" *ngIf="activeDetailResult()" (click)="closeDetailModal()">
+  <div class="modal-box detail-modal-box animate-fadeInUp" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="detail-header-info">
+        <div style="display:flex; gap:6px; flex-wrap:wrap">
+          <span class="badge badge-teal" *ngIf="activeDetailResult()?.reponse?.['collection']">
+            📁 {{ activeDetailResult()?.reponse?.['collection'] }}
+          </span>
+          <span class="badge badge-navy" *ngIf="activeDetailResult()?.reponse?.['grouping']" [title]="activeDetailResult()?.reponse?.['grouping']">
+            📂 {{ formatGrouping(activeDetailResult()?.reponse?.['grouping']) }}
+          </span>
+        </div>
+        <h3>{{ activeDetailResult()?.reponse?.['reference'] || activeDetailResult()?.reponse?.['levelvalue5'] || 'Détails du document' }}</h3>
+      </div>
+      <button class="modal-close" (click)="closeDetailModal()">✕</button>
+    </div>
+
+    <div class="modal-body-content detail-body">
+      <!-- Level Header Title -->
+      <div class="detail-level-title-banner" *ngIf="getFormattedLevelHeader(activeDetailResult()!) as lvl">
+        <span class="level-lbl-name">{{ lvl.label }} :</span>
+        <span class="level-lbl-value">{{ lvl.value }}</span>
+      </div>
+
+      <!-- Full Untruncated Paragraph Content -->
+      <div class="full-content-box">
+        <h4 class="full-content-label">Contenu Intégral du Paragraphe :</h4>
+        <p class="full-content-text">{{ activeDetailResult()?.reponse?.['contenu'] || activeDetailResult()?.reponse?.['paragraph'] }}</p>
+      </div>
+
+      <!-- Complete Metadata Hierarchy -->
+      <div class="detail-hierarchy-section">
+        <h4 class="full-content-label">Hiérarchie & Métadonnées Légales :</h4>
+        <div class="hierarchy-tags-grid">
+          <div class="hier-tag-item" *ngFor="let badge of getActiveLevelBadges(activeDetailResult()!)">
+            <span class="hier-label">{{ badge.label }} :</span>
+            <span class="hier-val">{{ badge.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions flex-between" style="margin-top:20px; border-top:1px solid var(--border-light); padding-top:16px">
+      <div>
+        <button
+          *ngIf="activeDetailResult()?.reponse?.['hyperlink'] || activeDetailResult()?.reponse?.['document_url']"
+          (click)="openPdf(activeDetailResult()!)"
+          class="btn btn-outline btn-sm">
+          📄 Consulter le document PDF source
+        </button>
+      </div>
+
+      <div style="display:flex; gap:10px">
+        <button class="btn" [class.btn-primary]="!isReferenceSelected(activeDetailResult()?.result_id!)" [class.btn-outline]="isReferenceSelected(activeDetailResult()?.result_id!)"
+                (click)="toggleSelectReference(activeDetailResult()!)">
+          {{ isReferenceSelected(activeDetailResult()?.result_id!) ? '✓ Référence sélectionnée' : '☑️ Ajouter au Rapport IA' }}
+        </button>
+        <button class="btn btn-ghost" (click)="closeDetailModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATED AI REPORT MODAL -->
+<div class="modal-overlay" *ngIf="showReportModal()" (click)="closeAiReportModal()">
+  <div class="modal-box report-modal-box animate-fadeInUp" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-size:24px">🤖</span>
+        <div>
+          <h3>Rapport d'Analyse Juridique IA</h3>
+          <span class="text-muted" style="font-size:12px">Synthèse basée sur {{ selectedReferences.size }} référence(s) sélectionnée(s)</span>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeAiReportModal()">✕</button>
+    </div>
+
+    <div class="modal-body-content report-body">
+      <!-- Loading indicator -->
+      <div class="report-loading-box" *ngIf="reportLoading()">
+        <span class="spinner" style="width:36px; height:36px"></span>
+        <h4 style="color:var(--navy); margin-top:14px">Génération du rapport d'analyse par l'IA...</h4>
+        <p class="text-muted" style="font-size:13px">Analyse rigoureuse et structurée des articles réglementaires sélectionnés.</p>
+      </div>
+
+      <!-- Generated Report Output -->
+      <div class="generated-report-text markdown-body" *ngIf="!reportLoading() && generatedReport()">
+        <!-- Print Only Header -->
+        <div class="print-only-header">
+          <div class="print-header-top">
+            <img src="assets/logo.png" alt="LEX-IA Logo" class="print-logo" />
+            <div class="print-brand-info">
+              <span class="print-brand-name">LEX-IA</span>
+              <span class="print-brand-sub">CONFORMITÉ &amp; INTELLIGENCE ARTIFICIELLE JURIDIQUE</span>
+            </div>
+            <div class="print-date">{{ getPrintDate() }}</div>
+          </div>
+          <div class="print-header-line"></div>
+          <div class="print-meta-summary">
+            <strong>Question posée :</strong> &ldquo;{{ query }}&rdquo;
+          </div>
+        </div>
+
+        <!-- Edit mode toolbar (admin / responsable juridique only) -->
+        <div class="report-edit-toolbar" *ngIf="canEditReport() && !reportEditMode()">
+          <span class="report-edit-hint">Vous pouvez modifier ce rapport avant de le sauvegarder.</span>
+          <button class="btn btn-outline btn-sm" (click)="toggleReportEditMode()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Modifier le rapport
+          </button>
+        </div>
+
+        <div class="report-edit-toolbar report-edit-active" *ngIf="canEditReport() && reportEditMode()">
+          <span class="report-edit-hint editing">Mode édition actif &mdash; cliquez dans le texte pour modifier.</span>
+          <button class="btn btn-ghost btn-sm" (click)="toggleReportEditMode()">Annuler</button>
+        </div>
+
+        <!-- Static view -->
+        <div class="report-content-pre" *ngIf="!reportEditMode()" [innerHTML]="formatReportHtml(generatedReport())"></div>
+
+        <!-- Editable view (contenteditable) -->
+        <div class="report-content-pre report-editable"
+             *ngIf="reportEditMode()"
+             contenteditable="true"
+             (input)="onReportEditorInput($event)"
+             [innerHTML]="editedReportHtml()">
+        </div>
+
+        <!-- Print Only Footer -->
+        <div class="print-only-footer">
+          <div class="print-footer-line"></div>
+          <div class="print-footer-content">
+            <span>Rapport généré par LEX-IA | Bank Al-Maghrib Compliance Suite</span>
+            <span class="print-page-num">Confidentiel Interne</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px; border-top:1px solid var(--border-light); padding-top:16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between" *ngIf="!reportLoading() && generatedReport()">
+
+      <!-- Left: feedback/status -->
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+        <span *ngIf="copySuccess()" style="color:#059669; font-size:13px; font-weight:600">✓ Copié !</span>
+        <span *ngIf="savedToJurisprudence()" style="color:#059669; font-size:13px; font-weight:600; display:flex; align-items:center; gap:5px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Sauvegardé en jurisprudence
+        </span>
+        <span *ngIf="saveError()" style="color:#dc2626; font-size:12px">{{ saveError() }}</span>
+
+        <!-- Save to Jurisprudence button (admin / juridique only) -->
+        <button *ngIf="canEditReport() && !savedToJurisprudence()" class="btn btn-save-juri"
+                (click)="saveToJurisprudence()"
+                [disabled]="saveLoading()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          {{ saveLoading() ? 'Sauvegarde...' : 'Sauvegarder en Jurisprudence' }}
+        </button>
+      </div>
+
+      <!-- Right: document actions -->
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" (click)="copyReportToClipboard()" title="Copier le texte brut">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copier
+        </button>
+        <button class="btn btn-outline" (click)="downloadReportPdf()" title="Télécharger en PDF">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Télécharger PDF
+        </button>
+        <button class="btn btn-outline" (click)="printReport()" title="Imprimer">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer
+        </button>
+        <button class="btn btn-primary" (click)="closeAiReportModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Viewer Drawer -->
+<div class="pdf-drawer-overlay" [class.open]="pdfDrawerOpen()" (click)="closePdf($event)"></div>
+<div class="pdf-drawer" [class.open]="pdfDrawerOpen()">
+  <button class="drawer-close" (click)="closePdf()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <app-pdf-viewer
+    *ngIf="pdfDrawerOpen()"
+    [pdfUrl]="activePdfUrl()"
+    [highlightText]="activePdfHighlight()"
+    [targetPage]="activePdfPage()"
+    [title]="activePdfTitle()">
+  </app-pdf-viewer>
+</div>
