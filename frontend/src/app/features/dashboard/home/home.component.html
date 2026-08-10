@@ -197,4 +197,52 @@
 
   </ng-container>
 
+  <!-- ═══════════════════════════════════════════════
+       STATISTIQUES (tous les roles)
+  ═══════════════════════════════════════════════ -->
+  <div class="charts-section animate-fadeInUp" style="animation-delay:.24s">
+
+    <!-- Evolution des recherches -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <h3>Evolution des recherches</h3>
+        <div class="period-switch">
+          <button type="button"
+                  *ngFor="let p of periodes"
+                  [class.active]="p === periodeActive"
+                  (click)="changerPeriode(p)">{{ p }} j</button>
+        </div>
+      </div>
+      <div class="chart-wrapper chart-wrapper-lg">
+        <canvas #evolutionCanvas></canvas>
+        <div class="chart-empty" *ngIf="chartsVides">Aucune donnee sur la periode.</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+
+      <!-- Repartition par statut -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>Repartition par statut</h3>
+          <span class="badge badge-teal">{{ totalQuestions }} requetes</span>
+        </div>
+        <div class="chart-wrapper">
+          <canvas #statutCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- Utilisateurs les plus actifs -->
+      <div class="card chart-card">
+        <div class="card-header">
+          <h3>Utilisateurs les plus actifs</h3>
+        </div>
+        <div class="chart-wrapper">
+          <canvas #utilisateursCanvas></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
