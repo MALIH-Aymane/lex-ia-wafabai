@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface GroupingDoc {
   id: number;
@@ -375,7 +376,7 @@ export class GroupingsComponent implements OnInit {
   loadGroupings() {
     this.loading.set(true);
     this.error.set('');
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/db/groupings').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/db/groupings`).subscribe({
       next: (res) => {
         this.groupings.set(res.groupings || []);
         this.loading.set(false);
@@ -427,7 +428,7 @@ export class GroupingsComponent implements OnInit {
       new_name: this.newGroupingName.trim()
     };
 
-    this.http.put<any>('http://127.0.0.1:5000/api/documents/db/groupings/rename', payload).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/api/documents/db/groupings/rename`, payload).subscribe({
       next: (res) => {
         this.successMsg.set(res.message || 'Grouping renommé avec succès.');
         this.actionLoading.set(false);
@@ -457,7 +458,7 @@ export class GroupingsComponent implements OnInit {
     const docId = this.selectedDoc()!.id;
     const payload = { grouping: this.targetGroupingName.trim() };
 
-    this.http.put<any>(`http://127.0.0.1:5000/api/documents/${docId}/grouping`, payload).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/api/documents/${docId}/grouping`, payload).subscribe({
       next: (res) => {
         this.successMsg.set(res.message || 'Document reclassé.');
         this.actionLoading.set(false);
@@ -485,7 +486,7 @@ export class GroupingsComponent implements OnInit {
     this.error.set('');
 
     const grpName = encodeURIComponent(this.selectedGroup()!.grouping);
-    const url = `http://127.0.0.1:5000/api/documents/db/groupings/${grpName}?cascade=${this.deleteCascade}`;
+    const url = `${environment.apiUrl}/api/documents/db/groupings/${grpName}?cascade=${this.deleteCascade}`;
 
     this.http.delete<any>(url).subscribe({
       next: (res) => {

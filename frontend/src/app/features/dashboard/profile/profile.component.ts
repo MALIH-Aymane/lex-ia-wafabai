@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -206,7 +207,7 @@ export class ProfileComponent implements OnInit {
     this.loading.set(true);
     const token = this.auth.token() || '';
     const headers = { Authorization: `Bearer ${token}` };
-    this.http.put<any>('http://127.0.0.1:5000/api/auth/update_profile', this.form, { headers }).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/api/auth/update_profile`, this.form, { headers }).subscribe({
       next: (updatedUser) => {
         this.loading.set(false);
         this.saved.set(true);
@@ -229,7 +230,7 @@ export class ProfileComponent implements OnInit {
     if (this.pw.new_password !== this.pw.confirm) { this.pwError.set('Les mots de passe ne correspondent pas.'); return; }
     const token = this.auth.token() || '';
     const headers = { Authorization: `Bearer ${token}` };
-    this.http.post('http://127.0.0.1:5000/api/auth/change_password', { current_password: this.pw.current, new_password: this.pw.new_password }, { headers })
+    this.http.post(`${environment.apiUrl}/api/auth/change_password`, { current_password: this.pw.current, new_password: this.pw.new_password }, { headers })
       .subscribe({ next: () => { this.pw = { current: '', new_password: '', confirm: '' }; }, error: e => this.pwError.set(e.error?.msg ?? 'Erreur') });
   }
 }

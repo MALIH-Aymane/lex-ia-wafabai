@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 interface StatItem {
   icon: string;
@@ -374,7 +375,7 @@ export class HomeComponent implements OnInit {
   }
 
   loadStats() {
-    this.http.get<any>('http://127.0.0.1:5000/api/dashboard/stats').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/dashboard/stats`).subscribe({
       next: (res) => {
         if (res.questions) {
           this.stats[0].value = String(res.questions.total || 0);

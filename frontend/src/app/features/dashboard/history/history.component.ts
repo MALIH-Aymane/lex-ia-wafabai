@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export interface QuestionHistoryItem {
   id: number;
@@ -317,7 +318,7 @@ export class HistoryComponent implements OnInit {
     this.loading.set(true);
     this.errorMsg.set('');
 
-    const url = `http://127.0.0.1:5000/api/question/users/questions/pagination?page=${page}&per_page=${this.perPage}`;
+    const url = `${environment.apiUrl}/api/question/users/questions/pagination?page=${page}&per_page=${this.perPage}`;
 
     this.http.get<HistoryPaginatedResponse>(url, { headers: this.headers }).subscribe({
       next: (res) => {
@@ -405,7 +406,7 @@ export class HistoryComponent implements OnInit {
     this.successMsg.set('');
     this.errorMsg.set('');
 
-    const url = `http://127.0.0.1:5000/api/question/questions/${item.id}/send-to-expert`;
+    const url = `${environment.apiUrl}/api/question/questions/${item.id}/send-to-expert`;
 
     this.http.post(url, {}, { headers: this.headers }).subscribe({
       next: () => {
@@ -429,7 +430,7 @@ export class HistoryComponent implements OnInit {
     this.successMsg.set('');
     this.errorMsg.set('');
 
-    const url = `http://127.0.0.1:5000/api/question/question/${item.id}`;
+    const url = `${environment.apiUrl}/api/question/question/${item.id}`;
 
     this.http.delete(url, { headers: this.headers }).subscribe({
       next: () => {

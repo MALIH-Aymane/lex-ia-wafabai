@@ -1,4 +1,4 @@
-from flask import Flask , jsonify
+from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -88,17 +88,24 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Global CORS handling
+    # Global CORS handling - Fully open for all origins, methods, and headers
+    cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "*")
+    allowed_origins = [o.strip() for o in cors_origins.split(",")] if cors_origins != "*" else "*"
+
     CORS(app, resources={r"/*": {
-        "origins": "*",
-        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+        "origins": allowed_origins,
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }})
 
     @app.after_request
     def after_request(response):
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+        origin = request.headers.get("Origin")
+        if origin:
+            response.headers["Access-Control-Allow-Origin"] = origin
+        else:
+            response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
         return response
 

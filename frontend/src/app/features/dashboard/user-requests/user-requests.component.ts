@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export interface UserQuestion {
   id: number;
@@ -347,7 +348,7 @@ export class UserRequestsComponent implements OnInit {
     const token = this.auth.token() || localStorage.getItem('lex_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    this.http.get<any>('http://127.0.0.1:5000/api/question/questions', { headers }).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/question/questions`, { headers }).subscribe({
       next: (res) => {
         const items = Array.isArray(res) ? res : (res.questions || []);
         this.questions.set(items);
@@ -435,7 +436,7 @@ export class UserRequestsComponent implements OnInit {
       context: []
     };
 
-    this.http.post<any>('http://127.0.0.1:5000/api/recherche/recherche_interpretation', payload, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/recherche/recherche_interpretation`, payload, { headers }).subscribe({
       next: (res) => {
         this.answerContent = res.answer || res.report || '';
         this.aiGenerating.set(false);
@@ -462,7 +463,7 @@ export class UserRequestsComponent implements OnInit {
       status: this.answerStatus
     };
 
-    this.http.post<any>('http://127.0.0.1:5000/api/jurisprudence/responses', payload, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/jurisprudence/responses`, payload, { headers }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.closeAnswerModal();

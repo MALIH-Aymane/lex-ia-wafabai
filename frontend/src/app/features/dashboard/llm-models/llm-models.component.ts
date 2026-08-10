@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 interface LLMModel {
   id: number;
@@ -502,7 +503,7 @@ function emptyModel(): Partial<LLMModel> {
 })
 export class LlmModelsComponent implements OnInit {
 
-  readonly API = 'http://127.0.0.1:5000/api/llm_models/llm-models';
+  readonly API = `${environment.apiUrl}/api/llm_models/llm-models`;
 
   models    = signal<LLMModel[]>([]);
   loading   = signal(true);

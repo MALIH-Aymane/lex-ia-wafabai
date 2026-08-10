@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface UploadedDocument {
   id: number;
@@ -612,7 +613,7 @@ export class DocumentsComponent implements OnInit {
       params.name = this.searchTerm.trim();
     }
 
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/documents', { params }).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/documents`, { params }).subscribe({
       next: (res) => {
         this.documents.set(res.documents || []);
         this.totalItems.set(res.total_items ?? (res.documents || []).length);
@@ -623,7 +624,7 @@ export class DocumentsComponent implements OnInit {
   }
 
   loadGroupings() {
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/documents/groupings').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/documents/groupings`).subscribe({
       next: (res) => {
         this.availableGroupings.set(res.groupings || []);
       },
@@ -643,7 +644,7 @@ export class DocumentsComponent implements OnInit {
   }
 
   loadVectorCollections() {
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/vector-collections').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/vector-collections`).subscribe({
       next: (res) => {
         const cols = res.collections || [];
         this.vectorCollections.set(cols);
@@ -760,7 +761,7 @@ export class DocumentsComponent implements OnInit {
         description: this.newColForm.description.trim()
       };
 
-      this.http.post<any>('http://127.0.0.1:5000/api/documents/vector-collections', createPayload)
+      this.http.post<any>(`${environment.apiUrl}/api/documents/vector-collections`, createPayload)
         .subscribe({
           next: () => {
             this.uploadFile(colName);
@@ -797,7 +798,7 @@ export class DocumentsComponent implements OnInit {
       formData.append(`levelvalue_${lvl.level}`, lvl.column);
     });
 
-    this.http.post<any>('http://127.0.0.1:5000/api/documents/documents/upload_csv', formData, {
+    this.http.post<any>(`${environment.apiUrl}/api/documents/documents/upload_csv`, formData, {
       reportProgress: true,
       observe: 'events'
     }).subscribe({
@@ -853,7 +854,7 @@ export class DocumentsComponent implements OnInit {
     if (!doc || !newName || newName === doc.name) return;
 
     this.renameLoading.set(true);
-    this.http.put<any>(`http://127.0.0.1:5000/api/documents/documents/${doc.id}/rename`, {
+    this.http.put<any>(`${environment.apiUrl}/api/documents/documents/${doc.id}/rename`, {
       new_name: newName
     }).subscribe({
       next: (res) => {
@@ -884,7 +885,7 @@ export class DocumentsComponent implements OnInit {
 
   deleteDoc(id: number) {
     if (!confirm('Voulez-vous masquer ce document de la liste ?')) return;
-    this.http.delete(`http://127.0.0.1:5000/api/documents/documents/${id}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/api/documents/documents/${id}`).subscribe({
       next: () => {
         this.loadDocuments();
         this.loadGroupings();

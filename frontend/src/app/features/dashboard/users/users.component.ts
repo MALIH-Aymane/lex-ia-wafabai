@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface User { id: number; username: string; email: string; firstname: string; lastname: string; role: any; is_blocked: boolean; avatar?: string; }
 
@@ -180,14 +181,14 @@ export class UsersComponent implements OnInit {
   ngOnInit() { this.loadUsers(); }
 
   loadUsers() {
-    this.http.get<User[]>('http://127.0.0.1:5000/api/user/users').subscribe({
+    this.http.get<User[]>(`${environment.apiUrl}/api/user/users`).subscribe({
       next: u => this.users.set(u), error: () => {}
     });
   }
 
   getAvatarUrl(u: User): string {
     if (u && u.avatar) {
-      return `http://127.0.0.1:5000/api/user/avatars/${u.avatar}?t=${encodeURIComponent(u.avatar)}`;
+      return `${environment.apiUrl}/api/user/avatars/${u.avatar}?t=${encodeURIComponent(u.avatar)}`;
     }
     return '';
   }
@@ -218,14 +219,14 @@ export class UsersComponent implements OnInit {
   saveUser() {
     const payload = { ...this.form, username: this.form.email };
     const req = this.editMode()
-      ? this.http.put(`http://127.0.0.1:5000/api/user/users/${this.editingId}`, payload)
-      : this.http.post('http://127.0.0.1:5000/api/user/users', payload);
+      ? this.http.put(`${environment.apiUrl}/api/user/users/${this.editingId}`, payload)
+      : this.http.post(`${environment.apiUrl}/api/user/users`, payload);
     req.subscribe({ next: () => { this.showModal.set(false); this.loadUsers(); }, error: e => console.error(e) });
   }
 
   deleteUser(id: number) {
     if (!confirm('Supprimer cet utilisateur ?')) return;
-    this.http.delete(`http://127.0.0.1:5000/api/user/users/${id}`).subscribe({ next: () => this.loadUsers() });
+    this.http.delete(`${environment.apiUrl}/api/user/users/${id}`).subscribe({ next: () => this.loadUsers() });
   }
 
   roleName(u: User): string { return typeof u.role === 'string' ? u.role : u.role?.name ?? ''; }

@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 export interface CollectionInfo {
   name: string;
@@ -459,7 +460,7 @@ export class DbManagerComponent implements OnInit {
 
   loadCollections() {
     this.loadingCollections.set(true);
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/db/collections').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/db/collections`).subscribe({
       next: (res) => {
         this.collections.set(res.collections || []);
         this.loadingCollections.set(false);
@@ -482,7 +483,7 @@ export class DbManagerComponent implements OnInit {
   }
 
   loadMetadataKeys(name: string) {
-    this.http.get<any>(`http://127.0.0.1:5000/api/documents/db/collections/${name}/metadata_keys`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/db/collections/${name}/metadata_keys`).subscribe({
       next: (res) => {
         this.availableMetadataKeys.set(res.metadata_keys || []);
         this.distinctValuesMap.set(res.distinct_values || {});
@@ -540,7 +541,7 @@ export class DbManagerComponent implements OnInit {
         filters: this.activeFilters
       };
 
-      this.http.post<any>(`http://127.0.0.1:5000/api/documents/db/collections/${name}/query`, payload).subscribe({
+      this.http.post<any>(`${environment.apiUrl}/api/documents/db/collections/${name}/query`, payload).subscribe({
         next: (res) => {
           this.records.set(res.records || []);
           this.loadingRecords.set(false);
@@ -557,7 +558,7 @@ export class DbManagerComponent implements OnInit {
         filters: this.activeFilters
       };
 
-      this.http.post<any>(`http://127.0.0.1:5000/api/documents/db/collections/${name}/peek`, payload).subscribe({
+      this.http.post<any>(`${environment.apiUrl}/api/documents/db/collections/${name}/peek`, payload).subscribe({
         next: (res) => {
           this.records.set(res.records || []);
           this.loadingRecords.set(false);
@@ -613,7 +614,7 @@ export class DbManagerComponent implements OnInit {
     this.editSaving.set(true);
     this.editError.set('');
 
-    const url = `http://127.0.0.1:5000/api/documents/db/collections/${colName}/records/${this.editingRecord.id}`;
+    const url = `${environment.apiUrl}/api/documents/db/collections/${colName}/records/${this.editingRecord.id}`;
 
     this.http.put<any>(url, payload).subscribe({
       next: (res) => {
@@ -636,7 +637,7 @@ export class DbManagerComponent implements OnInit {
     event.stopPropagation();
     if (!confirm(`Êtes-vous sûr de vouloir supprimer COMPLÈTEMENT la collection vectorielle "${name}" ?`)) return;
 
-    this.http.delete(`http://127.0.0.1:5000/api/documents/db/collections/${name}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/api/documents/db/collections/${name}`).subscribe({
       next: () => {
         if (this.selectedCollectionName() === name) {
           this.selectedCollectionName.set('');
@@ -653,7 +654,7 @@ export class DbManagerComponent implements OnInit {
     if (!colName) return;
     if (!confirm('Supprimer ce vecteur ?')) return;
 
-    this.http.delete(`http://127.0.0.1:5000/api/documents/db/collections/${colName}/records/${id}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/api/documents/db/collections/${colName}/records/${id}`).subscribe({
       next: () => {
         this.fetchRecords();
         this.loadCollections();

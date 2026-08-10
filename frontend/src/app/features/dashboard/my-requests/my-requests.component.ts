@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export interface UserQuestion {
   id: number;
@@ -234,7 +235,7 @@ export class MyRequestsComponent implements OnInit {
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
     // We fetch questions with status SENT_TO_EXPERT or JURISPRUDENCE for the current user
-    this.http.get<any>('http://127.0.0.1:5000/api/question/users/questions/by-status?status=SENT_TO_EXPERT,JURISPRUDENCE', { headers }).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/question/users/questions/by-status?status=SENT_TO_EXPERT,JURISPRUDENCE`, { headers }).subscribe({
       next: (res) => {
         const items = Array.isArray(res) ? res : (res.questions || []);
         this.questions.set(items);
@@ -294,7 +295,7 @@ export class MyRequestsComponent implements OnInit {
     const token = this.auth.token() || localStorage.getItem('lex_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    this.http.delete(`http://127.0.0.1:5000/api/question/question/${id}`, { headers }).subscribe({
+    this.http.delete(`${environment.apiUrl}/api/question/question/${id}`, { headers }).subscribe({
       next: () => {
         this.questions.update(list => list.filter(q => q.id !== id));
       },

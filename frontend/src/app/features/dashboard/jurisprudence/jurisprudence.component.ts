@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 export interface JurisprudenceHit {
   result_id: string;
@@ -606,7 +607,7 @@ export class JurisprudenceComponent implements OnInit {
       filters: []
     };
 
-    this.http.post<any>('http://127.0.0.1:5000/api/recherche/jurispridance', payload, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/recherche/jurispridance`, payload, { headers }).subscribe({
       next: (res) => {
         const hits = res.results || [];
         this.results.set(hits);
@@ -661,7 +662,7 @@ export class JurisprudenceComponent implements OnInit {
     const token = this.auth.token() || localStorage.getItem('lex_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    this.http.put<any>(`http://127.0.0.1:5000/api/jurisprudence/responses/${respId}/status`, { status: newStatus }, { headers }).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/api/jurisprudence/responses/${respId}/status`, { status: newStatus }, { headers }).subscribe({
       next: () => {
         item.reponse.status = newStatus;
         this.search();
@@ -681,7 +682,7 @@ export class JurisprudenceComponent implements OnInit {
     const token = this.auth.token() || localStorage.getItem('lex_token') || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    this.http.delete<any>(`http://127.0.0.1:5000/api/jurisprudence/responses/${respId}`, { headers }).subscribe({
+    this.http.delete<any>(`${environment.apiUrl}/api/jurisprudence/responses/${respId}`, { headers }).subscribe({
       next: () => {
         this.closeDetailModal();
         this.search();
@@ -702,7 +703,7 @@ export class JurisprudenceComponent implements OnInit {
       sources: []
     };
 
-    this.http.post('http://127.0.0.1:5000/api/jurisprudence/responses', payload, { headers }).subscribe({
+    this.http.post(`${environment.apiUrl}/api/jurisprudence/responses`, payload, { headers }).subscribe({
       next: () => {
         this.showNewModal.set(false);
         this.newForm = { question_id: null, content: '', status: 'PUBLISHED' };
@@ -720,7 +721,7 @@ export class JurisprudenceComponent implements OnInit {
     const token = this.auth.token() || '';
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
 
-    this.http.post<any>('http://127.0.0.1:5000/api/jurisprudence/submit_request', { query: this.query }, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/jurisprudence/submit_request`, { query: this.query }, { headers }).subscribe({
       next: () => {
         this.requestSubmitting.set(false);
         this.requestSuccess.set(true);
