@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://casoft.ma/mfimaroc'
+  apiUrl: 'http://localhost:5000'
 };
