@@ -1,0 +1,152 @@
+<div class="history-page">
+  <!-- Stats Header Row -->
+  <div class="stats-row grid-3">
+    <div class="stat-card card">
+      <div class="stat-icon icon-teal">📜</div>
+      <div class="stat-info">
+        <div class="stat-val">{{ totalItems() }}</div>
+        <div class="stat-lbl">Recherches effectuées</div>
+      </div>
+    </div>
+
+    <div class="stat-card card">
+      <div class="stat-icon icon-gold">👨‍⚖️</div>
+      <div class="stat-info">
+        <div class="stat-val">{{ sentToExpertCount() }}</div>
+        <div class="stat-lbl">Transmises à l'expert</div>
+      </div>
+    </div>
+
+    <div class="stat-card card">
+      <div class="stat-icon icon-navy">🕒</div>
+      <div class="stat-info">
+        <div class="stat-val stat-val-sm">{{ lastSearchDate() || '—' }}</div>
+        <div class="stat-lbl">Dernière recherche</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="controls-card card animate-fadeInUp">
+    <div class="controls-row">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="form-control input-with-icon" type="text"
+               placeholder="Filtrer l'historique par mot-clé..."
+               [(ngModel)]="searchFilter" (ngModelChange)="applyLocalFilter()" />
+      </div>
+
+      <div class="status-tabs">
+        <button class="tab-btn" [class.active]="selectedTab === 'ALL'" (click)="setTab('ALL')">
+          Tous ({{ questions().length }})
+        </button>
+        <button class="tab-btn" [class.active]="selectedTab === 'NORMAL'" (click)="setTab('NORMAL')">
+          Standard
+        </button>
+        <button class="tab-btn" [class.active]="selectedTab === 'EXPERT'" (click)="setTab('EXPERT')">
+          👨‍⚖️ Transmises ({{ sentToExpertCount() }})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback alert -->
+  <div class="alert-success" *ngIf="successMsg()">
+    <span>✅ {{ successMsg() }}</span>
+  </div>
+  <div class="alert-error" *ngIf="errorMsg()">
+    <span>⚠️ {{ errorMsg() }}</span>
+  </div>
+
+  <!-- History Items List -->
+  <div class="history-list card animate-fadeInUp">
+    <div class="loading-state" *ngIf="loading()">
+      <div class="spinner"></div>
+      <span>Chargement de l'historique...</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && filteredQuestions().length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Aucune recherche trouvée</h3>
+      <p>Vous n'avez pas encore d'historique correspondant à ces critères.</p>
+    </div>
+
+    <div class="history-table-wrapper" *ngIf="!loading() && filteredQuestions().length > 0">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date & Heure</th>
+            <th>Requête recherchée</th>
+            <th>Statut</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredQuestions()" class="history-row">
+            <td class="col-date">
+              <span class="date-badge">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                {{ item.date }}
+              </span>
+            </td>
+
+            <td class="col-query">
+              <div class="query-text">{{ item.texte }}</div>
+              <div class="query-meta" *ngIf="item.langue">
+                <span class="lang-tag">{{ item.langue | uppercase }}</span>
+              </div>
+            </td>
+
+            <td class="col-status">
+              <span [class]="getStatusClass(item.status)">
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+
+            <td class="col-actions text-right">
+              <div class="action-buttons">
+                <!-- Relaunch search -->
+                <button class="action-btn btn-search" (click)="relaunchSearch(item)" title="Rechercher à nouveau">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  Rechercher
+                </button>
+
+                <!-- Send to Expert -->
+                <button class="action-btn btn-expert"
+                        *ngIf="!isExpert(item.status)"
+                        (click)="sendToExpert(item)"
+                        [disabled]="actionLoadingId === item.id"
+                        title="Transmettre cette question à un expert juridique">
+                  👨‍⚖️ Expert
+                </button>
+
+                <!-- Delete -->
+                <button class="action-btn btn-delete"
+                        (click)="deleteItem(item)"
+                        [disabled]="actionLoadingId === item.id"
+                        title="Supprimer de l'historique">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="pagination-footer" *ngIf="totalPages() > 1">
+      <span class="pagination-info">
+        Page {{ currentPage() }} sur {{ totalPages() }} ({{ totalItems() }} éléments)
+      </span>
+      <div class="pagination-btns">
+        <button class="btn btn-secondary btn-sm" (click)="changePage(currentPage() - 1)" [disabled]="currentPage() <= 1">
+          ← Précédent
+        </button>
+        <button class="btn btn-secondary btn-sm" (click)="changePage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()">
+          Suivant →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

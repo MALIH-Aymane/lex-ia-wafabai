@@ -1,0 +1,285 @@
+<!-- ═══════════════════════════════════════════════════
+     NAVIGATION (LIGHT THEME)
+═══════════════════════════════════════════════════ -->
+<header class="nav-bar">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="assets/logo.png" alt="LEX-IA Logo" class="logo-img" />
+      <span class="logo-text">LEX<span class="logo-ia">-IA</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="#features">Fonctionnalités</a>
+      <a href="#about">Pourquoi LEX-IA ?</a>
+      <a href="#architecture">Architecture RAG</a>
+      <a href="#roles">Accès Rôles</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav-auth-box" *ngIf="auth.isLoggedIn(); else loginNav">
+      <span class="user-pill-badge">👤 {{ getUserDisplayName() }}</span>
+      <a routerLink="/dashboard" class="btn btn-primary btn-sm nav-cta">
+        Tableau de bord
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <ng-template #loginNav>
+      <a routerLink="/login" class="btn btn-navy btn-sm nav-cta">
+        Se connecter
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </ng-template>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO (LIGHT & ELEGANT WITH ORANGE ACCENTS)
+═══════════════════════════════════════════════════ -->
+<section class="hero bg-light-dots">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-container">
+    <div class="hero-content">
+      <span class="hero-badge animate-fadeIn">
+        <span class="badge-dot"></span>
+        Intelligence Artificielle Juridique pour Banques & Finance
+      </span>
+      <h1 class="hero-title animate-fadeInUp">
+        La recherche juridique<br>
+        <span class="text-gradient">réinventée pour le secteur bancaire</span>
+      </h1>
+      <p class="hero-subtitle animate-fadeInUp" style="animation-delay:.1s">
+        LEX-IA simplifie l'analyse, l'indexation et l'interprétation des circulaires de Bank Al-Maghrib et des textes réglementaires marocains grâce à notre moteur RAG vectoriel hautement sécurisé.
+      </p>
+      <div class="hero-actions animate-fadeInUp" style="animation-delay:.2s">
+        <a [routerLink]="auth.isLoggedIn() ? '/dashboard' : '/login'" class="btn btn-primary btn-lg">
+          {{ auth.isLoggedIn() ? 'Accéder à mon Tableau de bord' : 'Accéder à la plateforme' }}
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#about" class="btn btn-outline btn-lg">
+          Découvrir les fonctions
+        </a>
+      </div>
+
+      <!-- Stats row -->
+      <div class="hero-stats animate-fadeInUp" style="animation-delay:.3s">
+        <div class="stat">
+          <span class="stat-val text-navy">10 000+</span>
+          <span class="stat-lbl">Documents réglementaires</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-val text-navy">&lt; 1.5s</span>
+          <span class="stat-lbl">Temps de réponse moyen</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-val text-navy">Securisé</span>
+          <span class="stat-lbl">Base vectorielle locale</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero visual featuring premium generated text-free image -->
+    <div class="hero-visual animate-fadeIn" style="animation-delay:.15s">
+      <div class="visual-wrapper glass glow-orange-border">
+        <img src="assets/legal_ai_hero.png" alt="Intelligence Artificielle Juridique" class="hero-main-img" />
+        <div class="floating-badge badge-tr font-serif">
+          <span>⚖️ Conformité BAM</span>
+        </div>
+        <div class="floating-badge badge-bl">
+          <span>🚀 RAG Performance</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     WHY LEX-IA / ABOUT SECTION
+═══════════════════════════════════════════════════ -->
+<section class="section about-section bg-light" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-img-wrapper glow-orange-border">
+          <img src="assets/legal_docs_concept.png" alt="Analyse de documents juridiques" class="about-main-img" />
+        </div>
+      </div>
+      <div class="about-content">
+        <span class="section-tag">Pourquoi LEX-IA ?</span>
+        <h2 class="about-title text-navy">Une solution sur-mesure pour les départements juridiques bancaires</h2>
+        <p class="about-desc">
+          Les banques et institutions financières font face à un flux constant de nouvelles directives, circulaires et réglementations de Bank Al-Maghrib. La recherche manuelle dans ces corpus denses est fastidieuse et expose à des risques de non-conformité.
+        </p>
+        <div class="benefit-list">
+          <div class="benefit-item">
+            <span class="benefit-icon">✔</span>
+            <div>
+              <strong>Précision sémantique :</strong> Notre système comprend l'intention derrière votre question légale grâce aux embeddings vectoriels multidimensionnels.
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">✔</span>
+            <div>
+              <strong>Intégrité & Sécurité :</strong> Fonctionne avec une base de données ChromaDB locale. Vos recherches stratégiques restent strictement confidentielles.
+            </div>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">✔</span>
+            <div>
+              <strong>Rapports d'interprétation IA :</strong> Générez en un clic des synthèses conformes aux exigences de BAM, structurées pour la prise de décision.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     ARCHITECTURE & SECURITY SECTION (NEW VISUAL SHOWCASE)
+═══════════════════════════════════════════════════ -->
+<section class="section tech-section" id="architecture">
+  <div class="container">
+    <div class="about-grid reverse-grid">
+      <div class="about-content">
+        <span class="section-tag">Architecture & Sécurité</span>
+        <h2 class="about-title text-navy">Indexation vectorielle et RAG 100% sur réseau local</h2>
+        <p class="about-desc">
+          Conçu selon les standards de sécurité bancaire les plus stricts, LEX-IA s'exécute sur votre infrastructure interne sans fuite de données vers des serveurs tiers.
+        </p>
+        <div class="tech-pills">
+          <span class="tech-pill">⚡ Base Vectorielle ChromaDB</span>
+          <span class="tech-pill">🔒 Réseau Local Sécurisé</span>
+          <span class="tech-pill">🎯 Traçabilité des Sources</span>
+          <span class="tech-pill">🤖 Synthèse LLM Personnalisée</span>
+        </div>
+      </div>
+      <div class="about-visual">
+        <div class="about-img-wrapper glow-orange-border">
+          <img src="assets/vector_architecture.png" alt="Architecture Vectorielle ChromaDB" class="about-main-img" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FEATURES
+═══════════════════════════════════════════════════ -->
+<section class="section features-section bg-light" id="features">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Fonctionnalités</span>
+      <h2 class="section-title text-navy">Une suite d'outils performants<br>pour optimiser vos recherches</h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card card-hover animate-fadeInUp" *ngFor="let f of features; let i = index" [style.animation-delay]="i * 0.08 + 's'">
+        <div class="feature-icon" [class]="'icon-' + f.color">
+          <span [innerHTML]="f.icon"></span>
+        </div>
+        <h3 class="feature-title text-navy">{{ f.title }}</h3>
+        <p class="feature-desc">{{ f.desc }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     ROLES SECTION
+═══════════════════════════════════════════════════ -->
+<section class="section roles-section" id="roles">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Gestion des accès</span>
+      <h2 class="section-title text-navy">Une interface unifiée, des rôles adaptés</h2>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card" *ngFor="let r of roles">
+        <div class="role-badge" [class]="'badge-' + r.color">{{ r.tag }}</div>
+        <h3 class="text-navy">{{ r.name }}</h3>
+        <p>{{ r.desc }}</p>
+        <ul class="role-perms">
+          <li *ngFor="let p of r.perms">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+            {{ p }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FAQ SECTION (COLLAPSIBLE ACCORDION)
+═══════════════════════════════════════════════════ -->
+<section class="section faq-section bg-light" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Des questions ?</span>
+      <h2 class="section-title text-navy">Questions Fréquemment Posées</h2>
+    </div>
+
+    <div class="faq-accordion">
+      <div class="faq-item card" *ngFor="let item of faqList; let idx = index" (click)="toggleFaq(idx)">
+        <div class="faq-question flex-between">
+          <h4 class="text-navy">{{ item.q }}</h4>
+          <span class="faq-toggle">{{ openFaqIndex === idx ? '−' : '+' }}</span>
+        </div>
+        <div class="faq-answer" *ngIf="openFaqIndex === idx">
+          <p>{{ item.a }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     CTA BANNER
+═══════════════════════════════════════════════════ -->
+<section class="cta-banner bg-light-gradient">
+  <div class="orb orb-3"></div>
+  <div class="cta-content">
+    <h2 class="text-navy">Prenez de meilleures décisions réglementaires</h2>
+    <p class="text-muted">Modernisez votre workflow juridique bancaire dès aujourd'hui avec LEX-IA.</p>
+    <a [routerLink]="auth.isLoggedIn() ? '/dashboard' : '/login'" class="btn btn-primary btn-lg">
+      {{ auth.isLoggedIn() ? 'Accéder à mon Tableau de bord' : 'Commencer maintenant' }}
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER (LIGHT THEME)
+═══════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="assets/logo.png" alt="LEX-IA Logo" class="logo-img" />
+        <span class="logo-text text-navy">LEX<span class="logo-ia">-IA</span></span>
+        <p class="text-muted">Recherche réglementaire intelligente pour les institutions financières.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <div class="footer-col-title text-navy">Plateforme</div>
+          <a href="#features">Fonctionnalités</a>
+          <a href="#about">À propos</a>
+          <a href="#architecture">Architecture</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title text-navy">Légal & Sécurité</div>
+          <a href="#">Confidentialité</a>
+          <a href="#">Conditions générales</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="text-muted">© 2026 LEX-IA. Tous droits réservés.</span>
+      <span class="text-muted">Solution sur réseau local hautement sécurisée</span>
+    </div>
+  </div>
+</footer>

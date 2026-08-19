@@ -1,0 +1,178 @@
+<div class="user-requests-page">
+
+  <!-- HERO HEADER -->
+  <div class="hero-card card animate-fadeInUp">
+    <div class="hero-content">
+      <div class="hero-icon-box">📩</div>
+      <div>
+        <h2>Demandes & Sollicitations Juridiques</h2>
+        <p>Consultez les questions transmises par les utilisateurs, générez la synthèse IA et publiez les réponses officielles.</p>
+      </div>
+    </div>
+
+    <!-- STATS PILLS -->
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="stat-num">{{ pendingCount() }}</span>
+        <span class="stat-label">En attente d'expert</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">{{ processedCount() }}</span>
+        <span class="stat-label">Réponses validées</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">{{ questions().length }}</span>
+        <span class="stat-label">Total sollicitations</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER & SEARCH BAR -->
+  <div class="filter-bar animate-fadeInUp">
+    <div class="search-wrap">
+      <svg class="search-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Filtrer par mots-clés ou nom d'utilisateur..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+
+    <div class="status-tabs">
+      <button class="tab-btn" [class.active]="activeTab() === 'PENDING'" (click)="activeTab.set('PENDING')">
+        En attente ({{ pendingCount() }})
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'PROCESSED'" (click)="activeTab.set('PROCESSED')">
+        Traitées ({{ processedCount() }})
+      </button>
+      <button class="tab-btn" [class.active]="activeTab() === 'ALL'" (click)="activeTab.set('ALL')">
+        Toutes ({{ questions().length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- SUCCESS BANNER -->
+  <div class="success-banner animate-fadeInUp" *ngIf="successMsg()">
+    <span>✓ {{ successMsg() }}</span>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="loading()">
+    <span class="spinner" style="width:40px; height:40px"></span>
+    <h4>Chargement des demandes utilisateurs...</h4>
+  </div>
+
+  <!-- REQUESTS GRID -->
+  <div class="requests-grid" *ngIf="!loading() && filteredQuestions().length > 0">
+    <div class="request-card card card-hover animate-fadeInUp"
+         *ngFor="let q of filteredQuestions(); let i = index"
+         [style.animation-delay]="i * 0.05 + 's'">
+
+      <div class="req-header">
+        <div class="req-id-badge">Question #{{ q.id }}</div>
+        <span class="badge" [class]="getStatusBadgeClass(q.status)">
+          {{ formatStatusLabel(q.status) }}
+        </span>
+      </div>
+
+      <div class="req-question">
+        « {{ q.texte }} »
+      </div>
+
+      <div class="req-user-meta">
+        <span class="user-chip">👤 {{ q.user || 'Utilisateur' }}</span>
+        <span class="date-chip">📅 {{ q.date || 'Récemment' }}</span>
+      </div>
+
+      <div class="req-actions">
+        <button class="btn btn-primary btn-sm btn-block" (click)="handleRequestAction(q)">
+          <span *ngIf="q.status === 'Sent to expert' || q.status === 'SENT_TO_EXPERT'">✏️ Traiter & Répondre</span>
+          <span *ngIf="q.status !== 'Sent to expert' && q.status !== 'SENT_TO_EXPERT'">👁️ Consulter la réponse</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state card" *ngIf="!loading() && filteredQuestions().length === 0">
+    <div class="empty-icon">🎉</div>
+    <h3>Aucune demande dans cette catégorie</h3>
+    <p>Toutes les sollicitations juridiques de vos utilisateurs ont été traitées ou aucun résultat ne correspond à votre filtre.</p>
+  </div>
+
+  <!-- ANSWER / RESPONSE MODAL -->
+  <div class="modal-overlay" *ngIf="activeQuestion()" (click)="closeAnswerModal()">
+    <div class="modal-box answer-modal-box animate-fadeInUp" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div class="modal-icon-badge">⚖️</div>
+          <div>
+            <h3 style="margin:0; font-size:18px; color:var(--navy)">Traitement de la Demande #{{ activeQuestion()?.id }}</h3>
+            <span class="text-muted" style="font-size:12px">Rédigez la réponse réglementaire officielle</span>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeAnswerModal()">✕</button>
+      </div>
+
+      <div class="modal-body-content" style="flex:1; overflow-y:auto; padding:16px 0">
+        <!-- Question banner -->
+        <div class="question-callout">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+            <span class="callout-label">QUESTION DE L'UTILISATEUR ({{ activeQuestion()?.user }})</span>
+            <span class="callout-date">📅 {{ activeQuestion()?.date }}</span>
+          </div>
+          <h4 class="callout-text">« {{ activeQuestion()?.texte }} »</h4>
+        </div>
+
+        <!-- AI Draft Generator Button -->
+        <div class="ai-draft-box" style="margin-bottom:18px">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px">
+            <div>
+              <strong style="color:var(--navy); font-size:13.5px">💡 Assistant IA de Rédaction :</strong>
+              <p style="margin:2px 0 0; font-size:12px; color:var(--text-muted)">Générez automatiquement une ébauche de rapport synthétique à l'aide des modèles LLM.</p>
+            </div>
+            <button class="btn btn-outline btn-sm" (click)="generateAiDraft()" [disabled]="aiGenerating()">
+              <span class="spinner-sm" *ngIf="aiGenerating()"></span>
+              <span *ngIf="!aiGenerating()">🤖 Générer une ébauche par l'IA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Answer Content Textarea -->
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label" style="font-weight:700; color:var(--navy); margin-bottom:6px; display:block">
+            Réponse Juridique Officielle (Format rapport) :
+          </label>
+          <textarea
+            class="form-control answer-textarea"
+            rows="10"
+            [(ngModel)]="answerContent"
+            placeholder="Rédigez la réponse réglementaire explicative..."
+          ></textarea>
+        </div>
+
+        <!-- Status selector -->
+        <div class="form-group" style="display:flex; align-items:center; gap:16px">
+          <label class="form-label" style="font-weight:700; color:var(--navy); margin:0">Statut de la publication :</label>
+          <select class="filter-select" [(ngModel)]="answerStatus" style="height:36px; font-size:13px; min-width:180px">
+            <option value="PUBLISHED">✓ Publier en Jurisprudence</option>
+            <option value="DRAFT">📝 Enregistrer en Brouillon</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="modal-actions" style="margin-top:16px; border-top:1px solid var(--border-light); padding-top:16px; display:flex; justify-content:flex-end; gap:10px">
+        <button class="btn btn-ghost" (click)="closeAnswerModal()">Annuler</button>
+        <button class="btn btn-primary" (click)="submitAnswer()" [disabled]="submitting() || !answerContent.trim()">
+          <span class="spinner-sm" *ngIf="submitting()"></span>
+          <span *ngIf="!submitting()">🚀 Valider & Publier la Réponse</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

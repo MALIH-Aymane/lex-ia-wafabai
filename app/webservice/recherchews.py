@@ -13,6 +13,7 @@ from utils.chroma_client_manager import get_chroma_collection
 from utils.transformers_model_manager import get_sentence_transformer_model
 from llm_utils.llm_router import LLMRouter
 from repository.questionrepository import add_question, get_question_by_id
+from utils.decorators import role_required
 from datetime import datetime
 import traceback
 
@@ -190,7 +191,7 @@ def group_and_sort_hits_to_list(results, group_bonus_weight=0.2):
 # ---------------------------------------------------------------------------
 
 @recherche_ws.route('/recherche_simple', methods=['POST'])
-@jwt_required()
+@role_required('Administrateur', 'Responsable juridique')
 def simple_search():
     try:
         data = request.get_json()
@@ -298,7 +299,7 @@ def jurispridance_search():
 # ---------------------------------------------------------------------------
 
 @recherche_ws.route('/recherche_interpretation', methods=['POST'])
-@jwt_required()
+@role_required('Administrateur', 'Responsable juridique')
 def generate_report():
     data = request.get_json() or {}
 
@@ -453,7 +454,7 @@ Une analyse synthétique des dispositions réglementaires pertinentes basées su
 # ---------------------------------------------------------------------------
 
 @recherche_ws.route('/grouped_search', methods=['POST'])
-@jwt_required()
+@role_required('Administrateur', 'Responsable juridique')
 def chat_grouped():
     try:
         collection_name = 'lex-ia-total'

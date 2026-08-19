@@ -12,7 +12,12 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', loadComponent: () => import('./features/dashboard/home/home.component').then(m => m.HomeComponent) },
-      { path: 'search', loadComponent: () => import('./features/dashboard/search/search.component').then(m => m.SearchComponent) },
+      {
+        path: 'search',
+        loadComponent: () => import('./features/dashboard/search/search.component').then(m => m.SearchComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Administrateur', 'Responsable juridique'] }
+      },
       { path: 'history', loadComponent: () => import('./features/dashboard/history/history.component').then(m => m.HistoryComponent) },
       {
         path: 'jurisprudence',
