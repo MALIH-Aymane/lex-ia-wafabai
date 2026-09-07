@@ -42,3 +42,9 @@ Thumbs.db
 
 # Secrets & config
 database.yaml
+
+# Archives & Builds
+*.zip
+*.tar.gz
+*.rar
+
