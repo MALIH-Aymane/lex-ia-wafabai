@@ -1,8 +1,9 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, computed, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Chart } from 'chart.js/auto';
+import type { TooltipItem } from 'chart.js';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
@@ -202,7 +203,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             padding: 10,
             displayColors: false,
             callbacks: {
-              label: (item) => `${item.parsed.y} recherche(s)`
+              label: (item: TooltipItem<'line'>) => `${item.parsed.y} recherche(s)`
             }
           }
         },
@@ -265,7 +266,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             backgroundColor: this.NAVY,
             padding: 10,
             callbacks: {
-              label: (item) => {
+              label: (item: TooltipItem<'doughnut'>) => {
                 const valeur = item.parsed as number;
                 const pct = this.totalQuestions
                   ? Math.round((valeur / this.totalQuestions) * 100)
@@ -313,8 +314,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
             displayColors: false,
             // Le libelle tronque est remplace par sa version complete
             callbacks: {
-              title: (items) => serie.labels[items[0].dataIndex],
-              label: (item) => `${item.parsed.x} recherche(s)`
+              title: (items: TooltipItem<'bar'>[]) => serie.labels[items[0].dataIndex],
+              label: (item: TooltipItem<'bar'>) => `${item.parsed.x} recherche(s)`
             }
           }
         },
