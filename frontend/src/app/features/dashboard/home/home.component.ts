@@ -1,7 +1,8 @@
-import { Component, computed, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, computed, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 import { Chart } from 'chart.js/auto';
 import type { TooltipItem } from 'chart.js';
 import { AuthService } from '../../../core/services/auth.service';
@@ -33,16 +34,22 @@ interface SerieChart {
   imports: [CommonModule, RouterLink],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  private readonly API = 'http://127.0.0.1:5000/api/dashboard';
+  private readonly API = `${environment.apiUrl}/api/dashboard`;
 
   // Palette alignee sur la charte LEX-IA
   private readonly ORANGE = '#ff7a00';
   private readonly NAVY = '#0a1f4e';
   private readonly TEAL = '#14b8a6';
   private readonly AMBER = '#f59e0b';
+
+  /** UI state **/
+  isLoading = true;
+  statsError = false;
+  chartsError = false;
 
   @ViewChild('evolutionCanvas') evolutionCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('statutCanvas') statutCanvas?: ElementRef<HTMLCanvasElement>;
@@ -97,14 +104,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     return base;
   });
 
-  constructor(private auth: AuthService, private http: HttpClient) {}
+  constructor(private auth: AuthService, private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadStats();
   }
 
   ngAfterViewInit() {
-    // Les canvas ne sont disponibles qu'apres le rendu de la vue.
+    // Canvas elements are ready — charts can now render.
     this.loadCharts();
   }
 
@@ -117,12 +124,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   changerPeriode(jours: number) {
     if (jours === this.periodeActive) { return; }
     this.periodeActive = jours;
+    this.cdr.markForCheck();
     this.loadCharts();
   }
 
   loadStats() {
-    this.http.get<any>(`${environment.apiUrl}/api/dashboard/stats`).subscribe({
+    this.isLoading = true;
+    this.statsError = false;
+    this.http.get<any>(`${this.API}/stats`).subscribe({
       next: (res) => {
+        this.isLoading = false;
         if (res.questions) {
           this.stats[0].value = String(res.questions.total || 0);
           this.juristeStats[1].value = String(res.questions.total || 0);
@@ -138,8 +149,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         if (res.recent_activity) {
           this.recentActivity = res.recent_activity;
         }
+        this.cdr.markForCheck(); // notify OnPush that view needs update
       },
-      error: () => {}
+      error: (err) => {
+        this.isLoading = false;
+        this.statsError = true;
+        console.error('[Dashboard] Stats API error:', err);
+        this.cdr.markForCheck();
+      }
     });
   }
 
@@ -148,13 +165,21 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // ─────────────────────────────────────────────────
 
   loadCharts() {
+    this.chartsError = false;
     this.http.get<any>(`${this.API}/charts?jours=${this.periodeActive}&top=5`).subscribe({
       next: (res) => {
+        this.chartsError = false;
         this.dessinerEvolution(res.questions_par_jour);
         this.dessinerStatut(res.questions_par_statut);
         this.dessinerUtilisateurs(res.top_utilisateurs);
+        this.cdr.markForCheck();
       },
-      error: () => { this.chartsVides = true; }
+      error: (err) => {
+        this.chartsVides = true;
+        this.chartsError = true;
+        console.error('[Dashboard] Charts API error:', err);
+        this.cdr.markForCheck();
+      }
     });
   }
 

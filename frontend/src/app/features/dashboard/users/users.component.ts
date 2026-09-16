@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -12,15 +12,28 @@ interface User { id: number; username: string; email: string; firstname: string;
   imports: [CommonModule, FormsModule],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit {
   users = signal<User[]>([]);
   showModal = signal(false);
   editMode = signal(false);
-  searchTerm = '';
-  roleFilter = '';
+  searchTerm = signal('');
+  roleFilter = signal('');
   form: any = { firstname: '', lastname: '', email: '', password: '', role: 'Utilisateur' };
   private editingId: number | null = null;
+
+  /** Recomputed only when users(), searchTerm() or roleFilter() change */
+  filteredUsers = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const role = this.roleFilter();
+    return this.users().filter(u => {
+      const n = `${u.firstname} ${u.lastname} ${u.email}`.toLowerCase();
+      const matchSearch = !term || n.includes(term);
+      const matchRole = !role || this.roleName(u) === role;
+      return matchSearch && matchRole;
+    });
+  });
 
   constructor(private http: HttpClient) {}
 
@@ -39,14 +52,6 @@ export class UsersComponent implements OnInit {
     return '';
   }
 
-  filteredUsers() {
-    return this.users().filter(u => {
-      const n = `${u.firstname} ${u.lastname} ${u.email}`.toLowerCase();
-      const matchSearch = n.includes(this.searchTerm.toLowerCase());
-      const matchRole = !this.roleFilter || this.roleName(u) === this.roleFilter;
-      return matchSearch && matchRole;
-    });
-  }
 
   openCreate() {
     this.form = { firstname: '', lastname: '', email: '', password: '', role: 'Utilisateur' };

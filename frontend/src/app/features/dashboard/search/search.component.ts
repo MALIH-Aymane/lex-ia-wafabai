@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { PdfViewerComponent } from './pdf-viewer.component';
+import { environment } from '../../../../environments/environment';
 
 interface SearchResult {
   score: number;
@@ -209,7 +210,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   loadCollections() {
-    this.http.get<any>('http://127.0.0.1:5000/api/documents/vector-collections').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/documents/vector-collections`).subscribe({
       next: (res) => {
         const cols = res.collections || [];
         this.collections.set(cols);
@@ -219,7 +220,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   loadLlmModels() {
-    this.http.get<LLMModelOption[]>('http://127.0.0.1:5000/api/llm_models/llm-models/active').subscribe({
+    this.http.get<LLMModelOption[]>(`${environment.apiUrl}/api/llm_models/llm-models/active`).subscribe({
       next: (ms) => {
         this.llmModels.set(ms);
         if (!this.selectedLlmModel && ms.length > 0) {
@@ -239,7 +240,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     if (!this.selectedCollection) return;
 
     this.http.get<any>(
-      `http://127.0.0.1:5000/api/documents/db/collections/${this.selectedCollection}/groupings`
+      `${environment.apiUrl}/api/documents/db/collections/${this.selectedCollection}/groupings`
     ).subscribe({
       next: (res) => {
         this.availableGroupings.set(res.groupings || []);
@@ -293,7 +294,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.loadedQuestionText = '';
     }
 
-    this.http.post<any>('http://127.0.0.1:5000/api/recherche/recherche_simple', payload).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/recherche/recherche_simple`, payload).subscribe({
       next: (res) => {
         const hits = res.results ?? res.result_qdrant ?? [];
         this.results.set(hits);
@@ -384,7 +385,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       model_name: this.selectedLlmModel
     };
 
-    this.http.post<any>('http://127.0.0.1:5000/api/recherche/recherche_interpretation', payload, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/recherche/recherche_interpretation`, payload, { headers }).subscribe({
       next: (res) => {
         this.generatedReport.set(res.answer || res.report || 'Rapport généré.');
         this.reportLoading.set(false);
@@ -446,7 +447,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       status: 'DRAFT'
     };
 
-    this.http.post<any>('http://127.0.0.1:5000/api/jurisprudence/responses', payload, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/jurisprudence/responses`, payload, { headers }).subscribe({
       next: () => {
         this.savedToJurisprudence.set(true);
         this.saveLoading.set(false);
@@ -752,7 +753,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       url = raw;
     } else {
       const cleanPath = raw.split('/').filter(Boolean).map(segment => encodeURIComponent(segment)).join('/');
-      url = `http://127.0.0.1:5000/api/documents/pdfs/${cleanPath}`;
+      url = `${environment.apiUrl}/api/documents/pdfs/${cleanPath}`;
     }
 
     const cardTitle = r.reponse['titre'] || r.reponse['levelvalue6'] || r.reponse['reference'] || '';

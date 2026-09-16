@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -18,8 +18,11 @@ interface NavItem {
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './dashboard-layout.component.html',
   styleUrls: ['./dashboard-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardLayoutComponent {
+  /** Icon cache: computed once per nav item at construction, never recalculated */
+  private readonly iconCache = new Map<string, SafeHtml>();
   collapsed = signal(false);
 
   navItems: NavItem[] = [
@@ -126,7 +129,10 @@ export class DashboardLayoutComponent {
   }
 
   getSafeIcon(iconSvg: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(iconSvg);
+    if (!this.iconCache.has(iconSvg)) {
+      this.iconCache.set(iconSvg, this.sanitizer.bypassSecurityTrustHtml(iconSvg));
+    }
+    return this.iconCache.get(iconSvg)!;
   }
 
   toggleSidebar() {

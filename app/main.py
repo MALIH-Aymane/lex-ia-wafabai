@@ -98,17 +98,6 @@ def create_app():
         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     }})
 
-    @app.after_request
-    def after_request(response):
-        origin = request.headers.get("Origin")
-        if origin:
-            response.headers["Access-Control-Allow-Origin"] = origin
-        else:
-            response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-        return response
-
     # Register blueprints
     app.register_blueprint(question_ws, url_prefix='/api/question')
     app.register_blueprint(authws, url_prefix='/api/auth')

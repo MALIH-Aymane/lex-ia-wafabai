@@ -127,3 +127,27 @@
 }
 .period-switch button:hover { background: rgba(10,31,78,.08); }
 .period-switch button.active { background: #ff7a00; color: #fff; }
+
+/* ── Error banner ─────────────────────────────────── */
+.stats-error-banner {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.25);
+  border-radius: 10px;
+  font-size: 13px; font-weight: 500; color: #b91c1c;
+}
+
+/* ── Stat loading pulse ───────────────────────────── */
+@keyframes stat-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .35; }
+}
+.stat-loading {
+  animation: stat-pulse 1.2s ease-in-out infinite;
+  color: var(--text-muted) !important;
+}
+
+/* ── Chart error ─────────────────────────────────── */
+.chart-error { color: #b91c1c !important; }

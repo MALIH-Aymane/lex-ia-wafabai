@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
@@ -66,7 +66,8 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   constructor(
     public auth: AuthService,
-    private router: Router
+    private router: Router,
+    private zone: NgZone
   ) {}
 
   getUserDisplayName(): string {
@@ -82,14 +83,21 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     let i = 0;
-    this.typingInterval = setInterval(() => {
-      if (i <= this.fullText.length) {
-        this.typingText = this.fullText.substring(0, i++);
-      } else {
-        clearInterval(this.typingInterval);
-      }
-    }, 55);
-    this.cursorInterval = setInterval(() => this.cursorBlink = !this.cursorBlink, 530);
+    // Run outside Angular Zone — typing animation must not trigger CD every 55ms
+    this.zone.runOutsideAngular(() => {
+      this.typingInterval = setInterval(() => {
+        if (i <= this.fullText.length) {
+          const next = this.fullText.substring(0, i++);
+          this.zone.run(() => { this.typingText = next; });
+        } else {
+          clearInterval(this.typingInterval);
+        }
+      }, 55);
+      // Cursor blink: run fully outside zone, use CSS animation instead of JS
+      this.cursorInterval = setInterval(() => {
+        this.zone.run(() => { this.cursorBlink = !this.cursorBlink; });
+      }, 530);
+    });
   }
 
   ngOnDestroy() {

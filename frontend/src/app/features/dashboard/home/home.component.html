@@ -30,12 +30,16 @@
       </div>
     </div>
 
-    <!-- Legal Stats -->
+    <!-- Stats -->
     <div class="stats-row animate-fadeInUp" style="animation-delay:.08s">
+      <!-- Error banner -->
+      <div class="stats-error-banner" *ngIf="statsError">
+        ⚠️ Données temporairement indisponibles — vérifiez la connexion au serveur.
+      </div>
       <div class="stat-card stat-card-legal" *ngFor="let s of juristeStats">
         <div class="stat-icon" [class]="'si-' + s.color">{{ s.icon }}</div>
         <div class="stat-body">
-          <div class="stat-val">{{ s.value }}</div>
+          <div class="stat-val" [class.stat-loading]="isLoading">{{ isLoading ? '…' : s.value }}</div>
           <div class="stat-lbl">{{ s.label }}</div>
         </div>
         <div class="stat-trend" [class.up]="s.trend > 0" [class.down]="s.trend < 0" *ngIf="s.trend !== 0">
@@ -141,10 +145,14 @@
 
     <!-- Stats -->
     <div class="stats-row animate-fadeInUp" style="animation-delay:.08s">
+      <!-- Error banner -->
+      <div class="stats-error-banner" *ngIf="statsError">
+        ⚠️ Données temporairement indisponibles — vérifiez la connexion au serveur.
+      </div>
       <div class="stat-card" *ngFor="let s of stats">
         <div class="stat-icon" [class]="'si-' + s.color">{{ s.icon }}</div>
         <div class="stat-body">
-          <div class="stat-val">{{ s.value }}</div>
+          <div class="stat-val" [class.stat-loading]="isLoading">{{ isLoading ? '…' : s.value }}</div>
           <div class="stat-lbl">{{ s.label }}</div>
         </div>
         <div class="stat-trend" [class.up]="s.trend > 0" [class.down]="s.trend < 0" *ngIf="s.trend !== 0">
@@ -215,7 +223,8 @@
       </div>
       <div class="chart-wrapper chart-wrapper-lg">
         <canvas #evolutionCanvas></canvas>
-        <div class="chart-empty" *ngIf="chartsVides">Aucune donnee sur la periode.</div>
+        <div class="chart-empty" *ngIf="chartsVides && !chartsError">Aucune donnee sur la periode.</div>
+        <div class="chart-empty chart-error" *ngIf="chartsError">⚠️ Impossible de charger les graphiques — vérifiez le serveur.</div>
       </div>
     </div>
 

@@ -11,9 +11,14 @@
   <div class="search-bar-row animate-fadeInUp" style="animation-delay:.06s">
     <div class="input-wrapper" style="flex:1">
       <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="form-control input-with-icon" [(ngModel)]="searchTerm" placeholder="Rechercher un utilisateur..." />
+      <input class="form-control input-with-icon"
+             [ngModel]="searchTerm()"
+             (ngModelChange)="searchTerm.set($event)"
+             placeholder="Rechercher un utilisateur..." />
     </div>
-    <select class="form-control" style="width:180px" [(ngModel)]="roleFilter">
+    <select class="form-control" style="width:180px"
+            [ngModel]="roleFilter()"
+            (ngModelChange)="roleFilter.set($event)">
       <option value="">Tous les rôles</option>
       <option value="Administrateur">Administrateur</option>
       <option value="Responsable juridique">Resp. juridique</option>
