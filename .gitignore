@@ -41,7 +41,7 @@ yarn-error.log
 Thumbs.db
 
 # Secrets & config
-database.yaml
+# database.yaml
 
 # Archives & Builds
 *.zip
