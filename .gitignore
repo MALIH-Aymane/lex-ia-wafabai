@@ -9,9 +9,9 @@ build/
 .venv/
 venv/
 env/
-.env
-*.db
-*.sqlite3
+# .env
+# *.db
+# *.sqlite3
 
 # Flask
 instance/
